@@ -1,0 +1,23 @@
+# Build Outputs
+backend/build/
+backend/logs/
+frontend/app/build/
+frontend/.gradle/
+starter-*/dist/
+starter-*/node_modules/
+
+# IDE
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+*.iml
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Env Files
+.env
+.env.local
+*.log
