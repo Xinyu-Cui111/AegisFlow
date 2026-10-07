@@ -79,10 +79,10 @@ capture_still() {
   local outfile="$1"; shift
   local settle=5
   if [[ "$*" == *"-uiDemoRoute"* ]] || [[ "$*" == *"-uiDemoPage"* ]]; then
-    settle=7
+    settle=9
   fi
   if [[ "$*" == *"-uiDemoRoute log"* ]] || [[ "$*" == *"logpicker"* ]] || [[ "$*" == *"-uiDemoRoute record"* ]]; then
-    settle=8
+    settle=9
   fi
   echo "==> Still $outfile :: $* (settle ${settle}s)"
   xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true

@@ -220,10 +220,13 @@ class AppState: ObservableObject {
                 ]
                 if profileRoutes.contains(route) {
                     NavigationCoordinator.shared.switchTab(5)
-                } else if ["knowledge", "knowledgegraph", "food", "foodanalysis"].contains(route) {
+                } else {
+                    // statistics / knowledge / food / notificationcenter 等从首页栈 push
                     NavigationCoordinator.shared.switchTab(1)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                // 等 MainTabView NavigationStack 就绪后再 push（过短会截到首页）
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                    NavigationCoordinator.shared.popToRoot()
                     NavigationCoordinator.shared.navigate(to: target)
                 }
             }

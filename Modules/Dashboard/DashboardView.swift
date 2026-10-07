@@ -554,66 +554,8 @@ struct DashboardView: View {
             }
         }
         .environment(\.dashboardSectionAccent, viewModel.dayTheme.primary)
-        .navigationDestination(for: AppRoute.self) { route in
-            switch route {
-            case .splash, .onboarding, .auth, .main:
-                EmptyView()
-            case .dashboard:
-                DashboardView()
-            case .plan:
-                PlanView()
-            case .healthData:
-                HealthDataView()
-            case .chat:
-                ChatView()
-            case .profile:
-                ProfileView()
-            case .settings:
-                SettingsView()
-            case .notificationSettings:
-                NotificationSettings()
-            case .privacySettings:
-                PrivacySettingsView()
-            case .editProfile:
-                EditProfileModal()
-            case .deviceManagement:
-                BluetoothSearchModal()
-            case .logRecord:
-                EmptyView()
-            case .exercisePlanDetail:
-                EmptyView()
-            case .microExerciseGuide:
-                EmptyView()
-            case .generatedPage(let html):
-                GeneratedPageView(htmlContent: html)
-            case .statistics:
-                StatisticsScreen()
-            case .twin3D:
-                Twin3DView()
-            case .avatar:
-                AvatarViewerView()
-            case .notificationCenter:
-                NotificationCenterView()
-            case .knowledgeGraph:
-                KnowledgeGraphView()
-            case .foodAnalysis:
-                FoodAnalysisView()
-            case .healthGoals:
-                HealthGoals()
-            case .helpSupport:
-                HelpSupportView()
-            case .level:
-                LevelScreen()
-            case .rewards:
-                RewardScreen()
-            case .premium:
-                PremiumScreen()
-            case .insightDetail(let category, let title):
-                InsightDetailView(category: category, title: title)
-            case .elemeOrder(let url):
-                ElemeOrderWebView(orderUrl: url)
-            }
-        }
+        // 路由由 MainTabView 的 NavigationStack + navigationDestination 统一承载，
+        // 此处再挂一份会导致 statistics/knowledge/food 等 push 失败、截图仍停在首页。
         .onAppear {
             viewModel.loadData()
             #if DEBUG

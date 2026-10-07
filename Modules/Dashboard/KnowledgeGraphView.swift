@@ -8,69 +8,62 @@ struct KnowledgeGraphView: View {
     @State private var searchText: String = ""
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.cream.ignoresSafeArea()
+        // 不套内层 NavigationStack：由 MainTabView 的 path push 承载，避免嵌套栈导致空白/回首页
+        ZStack {
+            Color.cream.ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    // 搜索栏
-                    SearchBar(text: $searchText)
-                        .padding(.horizontal, AegisSpacing.pageHorizontal)
-                        .padding(.vertical, 12)
+            VStack(spacing: 0) {
+                SearchBar(text: $searchText)
+                    .padding(.horizontal, AegisSpacing.pageHorizontal)
+                    .padding(.vertical, 12)
 
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if filteredNodes.isEmpty {
-                        EmptyStateView(
-                            icon: "brain",
-                            title: "暂无相关知识",
-                            message: "系统正在学习您的健康数据"
-                        )
-                    } else {
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
-                                // 核心知识节点
-                                if !viewModel.coreNodes.isEmpty {
-                                    KnowledgeSection(title: "核心指标", nodes: viewModel.coreNodes)
-                                }
-
-                                // 关联知识
-                                if !viewModel.relatedNodes.isEmpty {
-                                    KnowledgeSection(title: "关联分析", nodes: viewModel.relatedNodes)
-                                }
-
-                                // 建议知识
-                                if !viewModel.suggestedNodes.isEmpty {
-                                    KnowledgeSection(title: "健康建议", nodes: viewModel.suggestedNodes)
-                                }
+                if viewModel.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if filteredNodes.isEmpty {
+                    EmptyStateView(
+                        icon: "brain",
+                        title: "暂无相关知识",
+                        message: "系统正在学习您的健康数据"
+                    )
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 16) {
+                            if !viewModel.coreNodes.isEmpty {
+                                KnowledgeSection(title: "核心指标", nodes: viewModel.coreNodes)
                             }
-                            .padding(.horizontal, AegisSpacing.pageHorizontal)
-                            .padding(.bottom, AegisSpacing.bottomSafe)
+                            if !viewModel.relatedNodes.isEmpty {
+                                KnowledgeSection(title: "关联分析", nodes: viewModel.relatedNodes)
+                            }
+                            if !viewModel.suggestedNodes.isEmpty {
+                                KnowledgeSection(title: "健康建议", nodes: viewModel.suggestedNodes)
+                            }
                         }
+                        .padding(.horizontal, AegisSpacing.pageHorizontal)
+                        .padding(.bottom, AegisSpacing.bottomSafe)
                     }
                 }
             }
-            .navigationTitle("知识图谱")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(action: { viewModel.refreshGraph() }) {
-                            Label("刷新", systemImage: "arrow.clockwise")
-                        }
-                        Button(action: { viewModel.exportKnowledge() }) {
-                            Label("导出", systemImage: "square.and.arrow.up")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundColor(.grayDark)
+        }
+        .navigationTitle("知识图谱")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(action: { viewModel.refreshGraph() }) {
+                        Label("刷新", systemImage: "arrow.clockwise")
                     }
+                    Button(action: { viewModel.exportKnowledge() }) {
+                        Label("导出", systemImage: "square.and.arrow.up")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundColor(.grayDark)
                 }
             }
-            .sheet(item: $selectedNode) { node in
-                KnowledgeDetailSheet(node: node)
-            }
+        }
+        .sheet(item: $selectedNode) { node in
+            KnowledgeDetailSheet(node: node)
         }
         .onAppear {
             viewModel.loadGraph()

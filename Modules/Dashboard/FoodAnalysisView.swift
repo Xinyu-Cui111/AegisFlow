@@ -9,43 +9,42 @@ struct FoodAnalysisView: View {
     @State private var showCamera = false
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.cream.ignoresSafeArea()
-                
-                if viewModel.isAnalyzing {
-                    AnalyzingView(progress: viewModel.analyzingProgress)
-                } else if let result = viewModel.analysisResult {
-                    AnalysisResultView(result: result, viewModel: viewModel)
-                } else {
-                    EmptyAnalysisView(
-                        onPickImage: { showImagePicker = true },
-                        onTakePhoto: { showCamera = true }
-                    )
-                }
+        // 不套内层 NavigationStack：避免与 MainTabView path 嵌套冲突
+        ZStack {
+            Color.cream.ignoresSafeArea()
+
+            if viewModel.isAnalyzing {
+                AnalyzingView(progress: viewModel.analyzingProgress)
+            } else if let result = viewModel.analysisResult {
+                AnalysisResultView(result: result, viewModel: viewModel)
+            } else {
+                EmptyAnalysisView(
+                    onPickImage: { showImagePicker = true },
+                    onTakePhoto: { showCamera = true }
+                )
             }
-            .navigationTitle("饮食分析")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                if viewModel.analysisResult != nil {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("重新分析") {
-                            viewModel.reset()
-                        }
+        }
+        .navigationTitle("饮食分析")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if viewModel.analysisResult != nil {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("重新分析") {
+                        viewModel.reset()
                     }
                 }
             }
-            .sheet(isPresented: $showImagePicker) {
-                ImagePicker(image: $viewModel.selectedImage)
-            }
-            .fullScreenCover(isPresented: $showCamera) {
-                CameraView(image: $viewModel.selectedImage)
-            }
-            .onChange(of: viewModel.selectedImage) { _, newImage in
-                if newImage != nil {
-                    Task {
-                        await viewModel.analyzeFood()
-                    }
+        }
+        .sheet(isPresented: $showImagePicker) {
+            ImagePicker(image: $viewModel.selectedImage)
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraView(image: $viewModel.selectedImage)
+        }
+        .onChange(of: viewModel.selectedImage) { _, newImage in
+            if newImage != nil {
+                Task {
+                    await viewModel.analyzeFood()
                 }
             }
         }
