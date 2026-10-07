@@ -39,19 +39,29 @@ echo "Using simulator UDID=$UDID"
 
 echo "==> Build (Simulator, no code sign)"
 set -o pipefail
+# Project overrides SYMROOT to /tmp/AegisFlow; force products under DERIVED for CI.
 xcodebuild \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
   -configuration Debug \
   -destination "platform=iOS Simulator,id=$UDID" \
   -derivedDataPath "$DERIVED" \
+  SYMROOT="$DERIVED/Build/Products" \
+  OBJROOT="$DERIVED/Build/Intermediates" \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY="" \
-  build | tail -n 60
+  build | tee "$OUT/xcodebuild.log" | tail -n 80
 
-APP_PATH="$(find "$DERIVED/Build/Products" -name "$APP_NAME" -type d | head -1)"
-test -n "$APP_PATH"
+APP_PATH="$(
+  find "$DERIVED" /tmp/AegisFlow -name "$APP_NAME" -type d 2>/dev/null | head -1 || true
+)"
+if [[ -z "$APP_PATH" ]]; then
+  echo "ERROR: AegisFlow.app not found under $DERIVED or /tmp/AegisFlow" >&2
+  ls -laR "$DERIVED/Build/Products" 2>/dev/null || true
+  ls -laR /tmp/AegisFlow/BuildProducts 2>/dev/null || true
+  exit 1
+fi
 echo "App: $APP_PATH"
 
 echo "==> Boot simulator"
