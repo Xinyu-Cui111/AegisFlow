@@ -1,0 +1,85 @@
+name: Simulator Screenshots
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "AppMain.swift"
+      - "Modules/**"
+      - "GlobalManager/**"
+      - "ShareComponents/**"
+      - "AegisFlow.xcodeproj/**"
+      - "Scripts/capture-simulator-ui.sh"
+      - ".github/workflows/simulator-screenshots.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    name: Build + simctl capture
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available | head -n 60
+
+      - name: Capture real UI
+        run: |
+          chmod +x Scripts/capture-simulator-ui.sh
+          OUT_DIR="$PWD/docs/media/simulator" \
+          DERIVED_DATA="$PWD/build/DerivedData" \
+            Scripts/capture-simulator-ui.sh
+
+      - name: Promote into docs/media
+        run: |
+          set -euo pipefail
+          SRC=docs/media/simulator
+          DEST=docs/media
+          for f in dashboard.png chat-modes.png page-generated.png; do
+            test -f "$SRC/$f"
+            cp "$SRC/$f" "$DEST/$f"
+          done
+          if [[ -f "$SRC/walkthrough.mp4" ]]; then
+            cp "$SRC/walkthrough.mp4" "$DEST/walkthrough.mp4"
+          fi
+          # Prefer real mp4; keep gif only if ffmpeg available as lightweight loop
+          if command -v ffmpeg >/dev/null 2>&1 && [[ -f "$DEST/walkthrough.mp4" ]]; then
+            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -loop 0 "$DEST/walkthrough.gif" || true
+          fi
+          ls -la "$DEST"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aegisflow-simulator-ui
+          path: |
+            docs/media/dashboard.png
+            docs/media/chat-modes.png
+            docs/media/page-generated.png
+            docs/media/walkthrough.mp4
+            docs/media/walkthrough.gif
+            docs/media/simulator/**
+          if-no-files-found: error
+
+      - name: Commit media to main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git config user.name "Xinyu-Cui111"
+          git config user.email "Xinyu-Cui111@users.noreply.github.com"
+          git add docs/media/dashboard.png docs/media/chat-modes.png docs/media/page-generated.png \
+                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif docs/media/simulator || true
+          if git diff --cached --quiet; then
+            echo "No media changes to commit"
+            exit 0
+          fi
+          git commit -m "docs(media): refresh Simulator screenshots and walkthrough from CI"
+          git push origin HEAD:main

@@ -65,7 +65,15 @@ class AppState: ObservableObject {
     @Published var currentRoute: AppRoute = .splash
     
     init() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+        #if DEBUG
+        let uiDemo = ProcessInfo.processInfo.arguments.contains("-uiDemo")
+        let splashDelay: TimeInterval = uiDemo ? 0.35 : 2.0
+        #else
+        let uiDemo = false
+        let splashDelay: TimeInterval = 2.0
+        #endif
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + splashDelay) { [weak self] in
             guard let self = self else { return }
             self.isShowingSplash = false
             self.isInitialized = true
@@ -77,6 +85,15 @@ class AppState: ObservableObject {
                 PreferencesStorage.shared.isLoggedIn = false
                 PreferencesStorage.shared.onboardingCompleted = false
                 self.currentRoute = .auth
+                return
+            }
+
+            // DEBUG：-uiDemo 直达主界面，供 CI / Simulator 截真实界面
+            // 可选：-uiDemoTab dashboard|plan|data|chat|profile
+            // 可选：-uiDemoPage 打开 PAGE 生成页样例
+            if uiDemo {
+                Self.applyUIDemoBootstrap()
+                self.currentRoute = .main
                 return
             }
             #endif
@@ -93,6 +110,59 @@ class AppState: ObservableObject {
             }
         }
     }
+
+    #if DEBUG
+    private static func applyUIDemoBootstrap() {
+        let now = Date()
+        TokenStorage.shared.accessToken = "uidemo_access_token"
+        TokenStorage.shared.refreshToken = "uidemo_refresh_token"
+        TokenStorage.shared.tokenExpiry = now.addingTimeInterval(60 * 60 * 24)
+        UserDefaults.standard.set("uidemo-user", forKey: APIConfig.userIdKey)
+        UserDefaults.standard.set("uidemo@aegisflow.local", forKey: APIConfig.userEmailKey)
+        PreferencesStorage.shared.isLoggedIn = true
+        PreferencesStorage.shared.onboardingCompleted = true
+
+        let args = ProcessInfo.processInfo.arguments
+        let tabName: String = {
+            if let idx = args.firstIndex(of: "-uiDemoTab"), args.indices.contains(idx + 1) {
+                return args[idx + 1].lowercased()
+            }
+            return "dashboard"
+        }()
+        let tab: Int = {
+            switch tabName {
+            case "plan": return 2
+            case "data", "health": return 3
+            case "chat", "assistant": return 4
+            case "profile", "me": return 5
+            default: return 1
+            }
+        }()
+        NavigationCoordinator.shared.switchTab(tab)
+
+        if args.contains("-uiDemoPage") {
+            let sampleHTML = """
+            <html><head><meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+            body{font-family:-apple-system,sans-serif;background:#E8EEE9;margin:0;padding:24px;color:#2E2E2E}
+            h1{font-size:22px;margin:0 0 8px} .sub{color:#6b7280;margin-bottom:20px}
+            .card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px}
+            .bar{height:10px;background:#D4EADB;border-radius:8px;overflow:hidden;margin-top:8px}
+            .fill{height:100%;background:#4FAE83;width:72%}
+            </style></head><body>
+            <h1>本周睡眠分析</h1>
+            <div class="sub">PAGE 模式 · GeneratedPageView</div>
+            <div class="card"><b>平均睡眠</b><div>7.1 小时</div><div class="bar"><div class="fill"></div></div></div>
+            <div class="card"><b>建议</b><div>固定入睡窗口，午后减少咖啡因。</div></div>
+            </body></html>
+            """
+            NavigationCoordinator.shared.generatedPageHtml = sampleHTML
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                NavigationCoordinator.shared.navigate(to: .generatedPage(html: sampleHTML))
+            }
+        }
+    }
+    #endif
 }
 
 // MARK: - 根视图

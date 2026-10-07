@@ -1524,6 +1524,16 @@ class ChatViewModel: ObservableObject {
         if APIConfig.shouldAllowMockData {
             loadMockConversations()
         }
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if let idx = args.firstIndex(of: "-uiDemoMode"), args.indices.contains(idx + 1) {
+            switch args[idx + 1].uppercased() {
+            case "ORDER": currentMode = .order
+            case "PAGE": currentMode = .page
+            default: currentMode = .chat
+            }
+        }
+        #endif
     }
 
     // MARK: - 发送消息

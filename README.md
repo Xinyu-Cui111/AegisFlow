@@ -43,7 +43,10 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
   <img src="docs/media/walkthrough.gif" alt="AegisFlow walkthrough" width="280">
 </p>
 
-> 上图为按仓库 SwiftUI **设计 token 忠实还原**的手机框预览（配色/结构来自源码）。有 Mac 时可用 Simulator 实机截图替换，步骤见 [docs/media/README.md](docs/media/README.md)。
+录屏（Simulator）：[docs/media/walkthrough.mp4](docs/media/walkthrough.mp4)
+
+> 目标为 **iOS Simulator 实机截图/录屏**（GitHub Actions `macos-15` + `simctl`，DEBUG `-uiDemo`）。  
+> 若图仍是旧的 HTML 预览，触发 Actions：**Simulator Screenshots**，或本地 Mac 运行 `Scripts/capture-simulator-ui.sh`。
 
 ---
 
