@@ -43,16 +43,15 @@ jobs:
           set -euo pipefail
           SRC=docs/media/simulator
           DEST=docs/media
+          brew install ffmpeg >/dev/null 2>&1 || true
           for f in dashboard.png chat-modes.png page-generated.png; do
             test -f "$SRC/$f"
-            cp "$SRC/$f" "$DEST/$f"
+            # README-friendly width
+            ffmpeg -y -i "$SRC/$f" -vf "scale=390:-1:flags=lanczos" -update 1 "$DEST/$f"
           done
           if [[ -f "$SRC/walkthrough.mp4" ]]; then
-            cp "$SRC/walkthrough.mp4" "$DEST/walkthrough.mp4"
-          fi
-          # Prefer real mp4; keep gif only if ffmpeg available as lightweight loop
-          if command -v ffmpeg >/dev/null 2>&1 && [[ -f "$DEST/walkthrough.mp4" ]]; then
-            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -loop 0 "$DEST/walkthrough.gif" || true
+            ffmpeg -y -i "$SRC/walkthrough.mp4" -vf "scale=390:-1:flags=lanczos" -c:v libx264 -crf 28 -an "$DEST/walkthrough.mp4"
+            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 12 -loop 0 "$DEST/walkthrough.gif" || true
           fi
           ls -la "$DEST"
 
@@ -66,7 +65,6 @@ jobs:
             docs/media/page-generated.png
             docs/media/walkthrough.mp4
             docs/media/walkthrough.gif
-            docs/media/simulator/**
           if-no-files-found: error
 
       - name: Commit media to main
@@ -76,7 +74,7 @@ jobs:
           git config user.name "Xinyu-Cui111"
           git config user.email "Xinyu-Cui111@users.noreply.github.com"
           git add docs/media/dashboard.png docs/media/chat-modes.png docs/media/page-generated.png \
-                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif docs/media/simulator || true
+                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif
           if git diff --cached --quiet; then
             echo "No media changes to commit"
             exit 0

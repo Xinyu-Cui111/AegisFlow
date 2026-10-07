@@ -45,8 +45,8 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
 
 录屏（Simulator）：[docs/media/walkthrough.mp4](docs/media/walkthrough.mp4)
 
-> 目标为 **iOS Simulator 实机截图/录屏**（GitHub Actions `macos-15` + `simctl`，DEBUG `-uiDemo`）。  
-> 若图仍是旧的 HTML 预览，触发 Actions：**Simulator Screenshots**，或本地 Mac 运行 `Scripts/capture-simulator-ui.sh`。
+> 上图为 **GitHub Actions `macos-15` + iOS Simulator 实机截图/录屏**（DEBUG `-uiDemo`）。  
+> 重跑：[Actions → Simulator Screenshots](https://github.com/Xinyu-Cui111/AegisFlow/actions/workflows/simulator-screenshots.yml) 或本地 `Scripts/capture-simulator-ui.sh`。
 
 ---
 
