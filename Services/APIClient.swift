@@ -9,23 +9,38 @@ enum APIConfig {
     }
 
     static var backendHost: String {
-        value(for: "UnifiedBackendHost", default: "http://8.156.83.92:8080")
+        resolvedURLString(
+            value(for: "UnifiedBackendHost", default: "http://8.156.83.92:8080"),
+            fallback: "http://8.156.83.92:8080"
+        )
     }
 
     static var ragHost: String {
-        value(for: "UnifiedRAGHost", default: "http://8.156.83.92:8080")
+        resolvedURLString(
+            value(for: "UnifiedRAGHost", default: "http://8.156.83.92:8080"),
+            fallback: "http://8.156.83.92:8080"
+        )
     }
 
     static var baseURL: String {
-        value(for: "APIBaseURL", default: "\(backendHost)/api/v1")
+        resolvedURLString(
+            value(for: "APIBaseURL", default: "\(backendHost)/api/v1"),
+            fallback: "\(backendHost)/api/v1"
+        )
     }
 
     static var jdDemoBaseURL: String {
-        value(for: "JDDemoBaseURL", default: backendHost)
+        resolvedURLString(
+            value(for: "JDDemoBaseURL", default: backendHost),
+            fallback: backendHost
+        )
     }
 
     static var ragBaseURL: String {
-        value(for: "RAGBaseURL", default: ragHost)
+        resolvedURLString(
+            value(for: "RAGBaseURL", default: ragHost),
+            fallback: ragHost
+        )
     }
 
     static let timeout: TimeInterval = 30
@@ -36,8 +51,26 @@ enum APIConfig {
     static let isLoggedInKey = "isLoggedIn"
     static let allowMockDataKey = "AegisFlow.AllowMockData"
 
+    /// DEBUG 默认开启本地预览数据；Release 仅在显式打开时启用。
     static var shouldAllowMockData: Bool {
-        UserDefaults.standard.bool(forKey: allowMockDataKey)
+        if UserDefaults.standard.object(forKey: allowMockDataKey) == nil {
+            #if DEBUG
+            return true
+            #else
+            return false
+            #endif
+        }
+        return UserDefaults.standard.bool(forKey: allowMockDataKey)
+    }
+
+    /// Reject unexpanded `$(VAR)` Info.plist placeholders that produce "unsupported URL".
+    private static func resolvedURLString(_ raw: String, fallback: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.contains("$(") { return fallback }
+        guard let url = URL(string: trimmed), url.scheme != nil, url.host != nil else {
+            return fallback
+        }
+        return trimmed
     }
 }
 

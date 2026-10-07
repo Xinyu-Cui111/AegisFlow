@@ -739,15 +739,31 @@ class DashboardViewModel: ObservableObject {
     }
 
     private func handleDataUnavailable(_ message: String?) {
-        error = message ?? "暂无可同步数据"
         todayInsights = []
         todayMotivation = nil
         unreadNotificationCount = 0
         if APIConfig.shouldAllowMockData {
             loadPreviewMockData()
+            // 有本地预览时不挂黄条；避免把 NSURLError「unsupported URL」原文甩给用户
+            error = nil
         } else {
             clearHealthData()
+            error = Self.friendlyOfflineMessage(message)
         }
+    }
+
+    private static func friendlyOfflineMessage(_ message: String?) -> String {
+        let raw = (message ?? "").lowercased()
+        if raw.contains("unsupported url") || raw.contains("unsupportedurl") {
+            return "服务器地址无效，请检查网络配置"
+        }
+        if raw.contains("timed out") || raw.contains("timeout") || raw.contains("could not connect")
+            || raw.contains("网络")
+        {
+            return "网络暂不可用，请稍后重试"
+        }
+        if let message, !message.isEmpty { return message }
+        return "暂无可同步数据"
     }
 
     private func clearHealthData() {

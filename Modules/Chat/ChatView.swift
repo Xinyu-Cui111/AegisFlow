@@ -1524,9 +1524,6 @@ class ChatViewModel: ObservableObject {
 
     // MARK: - 初始化
     init() {
-        if APIConfig.shouldAllowMockData {
-            loadMockConversations()
-        }
         #if DEBUG
         if let mode = UIDemoLaunch.aiModeName {
             switch mode {
@@ -1535,19 +1532,60 @@ class ChatViewModel: ObservableObject {
             default: currentMode = .chat
             }
         }
-        // 预览态塞一条消息，避免只拍到空态欢迎页
-        if UIDemoLaunch.isEnabled && messages.isEmpty {
-            messages = [
-                ChatMessage(
-                    id: "uidemo-1",
-                    role: .assistant,
-                    content: "今天睡眠 7.2 小时。可切换「下单 / 对话 / 页面」模式继续。",
-                    timestamp: Date()
-                )
-            ]
+        if UIDemoLaunch.isEnabled {
+            // CI 预览：覆盖通用 mock，按模式注入可区分对话
+            messages = Self.uiDemoMessages(for: currentMode)
+            return
         }
         #endif
+        if APIConfig.shouldAllowMockData {
+            loadMockConversations()
+        }
     }
+
+    #if DEBUG
+    private static func uiDemoMessages(for mode: AiMode) -> [ChatMessage] {
+        let now = Date()
+        switch mode {
+        case .order:
+            return [
+                ChatMessage(
+                    id: "uidemo-o1", role: .user,
+                    content: "帮我点一份清淡外卖，少油少辣", timestamp: now.addingTimeInterval(-90)),
+                ChatMessage(
+                    id: "uidemo-o2", role: .assistant,
+                    content: "已进入「下单」模式。正在打开点餐页，并为你筛选低脂套餐…",
+                    timestamp: now.addingTimeInterval(-60)),
+                ChatMessage(
+                    id: "uidemo-o3", role: .assistant,
+                    content: "可继续说「换成沙拉碗」或「取消下单」。", timestamp: now),
+            ]
+        case .page:
+            return [
+                ChatMessage(
+                    id: "uidemo-p1", role: .user,
+                    content: "给我看本周睡眠分析页", timestamp: now.addingTimeInterval(-90)),
+                ChatMessage(
+                    id: "uidemo-p2", role: .assistant,
+                    content: "已进入「页面」模式。正在生成 SwiftUI / Web 分析页（GeneratedPageView）…",
+                    timestamp: now.addingTimeInterval(-60)),
+                ChatMessage(
+                    id: "uidemo-p3", role: .assistant,
+                    content: "生成完成后会直接打开定制页；也可再说「改成压力趋势」。", timestamp: now),
+            ]
+        case .chat:
+            return [
+                ChatMessage(
+                    id: "uidemo-c1", role: .user,
+                    content: "今天睡眠怎么样？给三条建议", timestamp: now.addingTimeInterval(-90)),
+                ChatMessage(
+                    id: "uidemo-c2", role: .assistant,
+                    content: "今天睡眠 7.2 小时，深度睡眠略偏低。\n1) 固定入睡窗口\n2) 午后少咖啡因\n3) 睡前 40 分钟远离强光屏",
+                    timestamp: now),
+            ]
+        }
+    }
+    #endif
 
     // MARK: - 发送消息
     func sendMessage() {

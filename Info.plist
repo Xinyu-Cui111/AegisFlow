@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>APIBaseURL</key>
-	<string>$(UnifiedBackendHost)/api/v1</string>
+	<string>http://8.156.83.92:8080/api/v1</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>JDDemoBaseURL</key>
-	<string>$(UnifiedBackendHost)</string>
+	<string>http://8.156.83.92:8080</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -40,7 +40,7 @@
 		</dict>
 	</dict>
 	<key>RAGBaseURL</key>
-	<string>$(UnifiedRAGHost)</string>
+	<string>http://8.156.83.92:8080</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
