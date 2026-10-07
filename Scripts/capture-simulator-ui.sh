@@ -81,6 +81,9 @@ capture_still() {
   if [[ "$*" == *"-uiDemoRoute"* ]] || [[ "$*" == *"-uiDemoPage"* ]]; then
     settle=9
   fi
+  if [[ "$*" == *"-uiDemoPage"* ]]; then
+    settle=11
+  fi
   if [[ "$*" == *"-uiDemoRoute log"* ]] || [[ "$*" == *"logpicker"* ]] || [[ "$*" == *"-uiDemoRoute record"* ]]; then
     settle=9
   fi

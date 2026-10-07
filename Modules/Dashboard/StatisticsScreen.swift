@@ -23,49 +23,36 @@ struct StatisticsScreen: View {
     private let periods = ["本周", "本月", "本年"]
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.cream.ignoresSafeArea()
+        // 不套内层 NavigationStack：由 MainTabView path push，避免截图仍停在首页
+        ZStack {
+            Color.cream.ignoresSafeArea()
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: AegisSpacing.sectionGap) {
-                        StatisticsDateHeader(selectedDate: $selectedDate)
-                        StatisticsWeekStrip(selectedDate: $selectedDate)
-                        // 周期选择器
-                        PeriodSelector(selectedPeriod: $selectedPeriod, periods: periods)
-                        QuickMetricStrip(viewModel: viewModel)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: AegisSpacing.sectionGap) {
+                    StatisticsDateHeader(selectedDate: $selectedDate)
+                    StatisticsWeekStrip(selectedDate: $selectedDate)
+                    PeriodSelector(selectedPeriod: $selectedPeriod, periods: periods)
+                    QuickMetricStrip(viewModel: viewModel)
 
-                        // 综合评分卡片
-                        OverallScoreCard(score: viewModel.overallScore, trend: viewModel.scoreTrend)
+                    OverallScoreCard(score: viewModel.overallScore, trend: viewModel.scoreTrend)
+                    CoreMetricsSection(viewModel: viewModel)
+                    TrendAnalysisSection(viewModel: viewModel, selectedPeriod: selectedPeriod)
+                    ActivityDistributionSection(viewModel: viewModel)
+                    SleepAnalysisSection(viewModel: viewModel)
+                    NutritionAnalysisSection(viewModel: viewModel)
+                    WeeklySummarySection(viewModel: viewModel)
+                    HealthTipsBanner()
 
-                        // 核心指标卡片
-                        CoreMetricsSection(viewModel: viewModel)
-
-                        // 趋势分析
-                        TrendAnalysisSection(viewModel: viewModel, selectedPeriod: selectedPeriod)
-
-                        // 活动分布
-                        ActivityDistributionSection(viewModel: viewModel)
-
-                        // 睡眠分析
-                        SleepAnalysisSection(viewModel: viewModel)
-
-                        // 营养分析
-                        NutritionAnalysisSection(viewModel: viewModel)
-                        WeeklySummarySection(viewModel: viewModel)
-                        HealthTipsBanner()
-
-                        Spacer(minLength: AegisSpacing.bottomSafe)
-                    }
-                    .padding(.horizontal, AegisSpacing.pageHorizontal)
-                    .padding(.top, 16)
+                    Spacer(minLength: AegisSpacing.bottomSafe)
                 }
+                .padding(.horizontal, AegisSpacing.pageHorizontal)
+                .padding(.top, 16)
             }
-            .navigationTitle("数据统计")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                StatisticsExportToolbar(viewModel: viewModel)
-            }
+        }
+        .navigationTitle("数据统计")
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            StatisticsExportToolbar(viewModel: viewModel)
         }
         .onAppear {
             viewModel.loadData()
