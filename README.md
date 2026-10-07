@@ -37,7 +37,9 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
 
 > **iOS Simulator 实机截图**（GitHub Actions `macos-15`）。重跑：[Simulator Screenshots](https://github.com/Xinyu-Cui111/AegisFlow/actions/workflows/simulator-screenshots.yml)
 
-| Dashboard | Chat · 三模式 | PAGE 生成页 |
+### 一眼看懂
+
+| Dashboard | Chat · CHAT | PAGE 生成页 |
 | :---: | :---: | :---: |
 | ![Dashboard](docs/media/dashboard.png) | ![Chat](docs/media/chat-modes.png) | ![PAGE](docs/media/page-generated.png) |
 
@@ -45,7 +47,20 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
   <img src="docs/media/walkthrough.gif" alt="AegisFlow walkthrough" width="240">
 </p>
 
-[walkthrough.mp4](docs/media/walkthrough.mp4) · [全部 16 屏 Gallery](docs/media/gallery/) · [滚动短片 scroll/](docs/media/scroll/) · [媒体说明](docs/media/README.md)
+### 产品流（关键操作）
+
+| 准入 | 五 Tab | AI 三模式 |
+| :---: | :---: | :---: |
+| ![enter](docs/media/flows/01-enter.gif) | ![tabs](docs/media/flows/02-tabs.gif) | ![ai](docs/media/flows/03-ai-modes.gif) |
+
+| 记录 + | 我的能力栈 |
+| :---: | :---: |
+| ![record](docs/media/flows/04-record.gif) | ![me](docs/media/flows/05-profile-stack.gif) |
+
+### 全页目录
+
+一屏一图（登录 / 引导 / 五 Tab / 三模式 / 记录+ / 设置·统计·目标·知识图谱·食物分析等）→ **[Gallery](docs/media/gallery/)** · 索引 **[MANIFEST](docs/media/MANIFEST.md)**  
+长页滚动 → [scroll/](docs/media/scroll/) · 说明 → [docs/media/README.md](docs/media/README.md)
 
 ---
 

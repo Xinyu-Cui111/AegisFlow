@@ -11,6 +11,8 @@ class NavigationCoordinator: ObservableObject {
     
     @Published var generatedPageHtml: String = ""
     @Published var elemeOrderUrl: String = ""
+    /// DEBUG / CI：打开首页「记录类型」选择 sheet（等价于点 +）
+    @Published var uiDemoPresentLogPicker: Bool = false
     
     func navigate(to route: AppRoute) {
         path.append(route)

@@ -20,7 +20,7 @@ jobs:
   capture:
     name: Build + simctl capture
     runs-on: macos-15
-    timeout-minutes: 75
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -43,8 +43,11 @@ jobs:
           set -euo pipefail
           SRC=docs/media/simulator
           DEST=docs/media
-          mkdir -p "$DEST/gallery" "$DEST/scroll"
+          mkdir -p "$DEST/gallery" "$DEST/scroll" "$DEST/flows"
           brew install ffmpeg >/dev/null 2>&1 || true
+
+          # Drop stale numbered stills (renumbered 01–24)
+          rm -f "$DEST/gallery"/[0-9][0-9]-*.png
 
           # Numbered gallery stills
           for f in "$SRC"/[0-9][0-9]-*.png; do
@@ -59,7 +62,15 @@ jobs:
             ffmpeg -y -i "$SRC/$f" -vf "scale=390:-1:flags=lanczos" -update 1 "$DEST/$f"
           done
 
-          # Scroll clips + gifs
+          # Product flows
+          for f in "$SRC"/flows/*.mp4; do
+            test -f "$f"
+            base="$(basename "$f" .mp4)"
+            ffmpeg -y -i "$f" -vf "scale=390:-1:flags=lanczos" -c:v libx264 -crf 28 -an "$DEST/flows/$base.mp4"
+            ffmpeg -y -i "$DEST/flows/$base.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 20 -loop 0 "$DEST/flows/$base.gif" || true
+          done
+
+          # Scroll clips + gifs (long pages only)
           for f in "$SRC"/scroll-*.mp4; do
             test -f "$f"
             base="$(basename "$f" .mp4)"
@@ -69,10 +80,14 @@ jobs:
 
           if [[ -f "$SRC/walkthrough.mp4" ]]; then
             ffmpeg -y -i "$SRC/walkthrough.mp4" -vf "scale=390:-1:flags=lanczos" -c:v libx264 -crf 28 -an "$DEST/walkthrough.mp4"
-            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 20 -loop 0 "$DEST/walkthrough.gif" || true
+            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 22 -loop 0 "$DEST/walkthrough.gif" || true
           fi
 
-          ls -la "$DEST" "$DEST/gallery" "$DEST/scroll"
+          if [[ -f "$SRC/MANIFEST.md" ]]; then
+            cp "$SRC/MANIFEST.md" "$DEST/MANIFEST.md"
+          fi
+
+          ls -la "$DEST" "$DEST/gallery" "$DEST/scroll" "$DEST/flows"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -84,8 +99,10 @@ jobs:
             docs/media/page-generated.png
             docs/media/walkthrough.mp4
             docs/media/walkthrough.gif
+            docs/media/MANIFEST.md
             docs/media/gallery/**
             docs/media/scroll/**
+            docs/media/flows/**
           if-no-files-found: error
 
       - name: Commit media to main
@@ -95,11 +112,11 @@ jobs:
           git config user.name "Xinyu-Cui111"
           git config user.email "Xinyu-Cui111@users.noreply.github.com"
           git add docs/media/dashboard.png docs/media/chat-modes.png docs/media/page-generated.png \
-                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif \
-                  docs/media/gallery docs/media/scroll
+                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif docs/media/MANIFEST.md \
+                  docs/media/gallery docs/media/scroll docs/media/flows
           if git diff --cached --quiet; then
             echo "No media changes to commit"
             exit 0
           fi
-          git commit -m "docs(media): full Simulator gallery + scroll clips from CI"
+          git commit -m "docs(media): full gallery + product flows from Simulator CI"
           git push origin HEAD:main

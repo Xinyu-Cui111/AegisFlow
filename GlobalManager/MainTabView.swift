@@ -93,6 +93,13 @@ struct MainTabView: View {
             ElemeOrderWebView(orderUrl: url)
         case .editProfile:
             EditProfileModal()
+        case .deviceManagement:
+            BluetoothSearchModal()
+        case .logRecord:
+            // 记录走 Dashboard sheet；此分支仅防 path 落空
+            Color.clear
+                .navigationTitle("记录")
+                .navigationBarTitleDisplayMode(.inline)
         default:
             EmptyView()
         }

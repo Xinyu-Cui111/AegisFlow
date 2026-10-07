@@ -616,6 +616,14 @@ struct DashboardView: View {
         }
         .onAppear {
             viewModel.loadData()
+            #if DEBUG
+            if NavigationCoordinator.shared.uiDemoPresentLogPicker {
+                NavigationCoordinator.shared.uiDemoPresentLogPicker = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+                    viewModel.showTypePicker = true
+                }
+            }
+            #endif
         }
         .sheet(isPresented: $showHeroCalendarSheet) {
             NavigationStack {

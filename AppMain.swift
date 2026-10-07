@@ -183,12 +183,20 @@ class AppState: ObservableObject {
             return
         }
 
+        // 首页「+」记录选择（sheet，非 push）
+        if route == "log" || route == "record" || route == "logpicker" {
+            NavigationCoordinator.shared.switchTab(1)
+            NavigationCoordinator.shared.uiDemoPresentLogPicker = true
+            return
+        }
+
         if let route {
             let target: AppRoute? = {
                 switch route {
                 case "settings": return .settings
                 case "statistics", "stats": return .statistics
                 case "notifications", "notificationcenter": return .notificationCenter
+                case "notificationsettings": return .notificationSettings
                 case "level": return .level
                 case "rewards": return .rewards
                 case "premium": return .premium
@@ -198,12 +206,22 @@ class AppState: ObservableObject {
                 case "privacy": return .privacySettings
                 case "help": return .helpSupport
                 case "twin3d", "avatar": return .twin3D
+                case "editprofile", "profileedit": return .editProfile
+                case "device", "devices", "devicemanagement": return .deviceManagement
                 default: return nil
                 }
             }()
             if let target {
-                if ["settings", "level", "rewards", "premium", "privacy", "help", "twin3d", "avatar", "healthgoals", "goals"].contains(route) {
+                let profileRoutes: Set<String> = [
+                    "settings", "level", "rewards", "premium", "privacy", "help",
+                    "twin3d", "avatar", "healthgoals", "goals", "editprofile",
+                    "profileedit", "device", "devices", "devicemanagement",
+                    "notificationsettings"
+                ]
+                if profileRoutes.contains(route) {
                     NavigationCoordinator.shared.switchTab(5)
+                } else if ["knowledge", "knowledgegraph", "food", "foodanalysis"].contains(route) {
+                    NavigationCoordinator.shared.switchTab(1)
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     NavigationCoordinator.shared.navigate(to: target)
