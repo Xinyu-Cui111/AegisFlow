@@ -1,35 +1,32 @@
-# 媒体资源（真实 Simulator）
+# 媒体资源（真实 Simulator · 全界面）
 
-## 推荐：云端截取（无需本机 Mac）
+## 云端截取（推荐）
 
-仓库已配置 GitHub Actions：`.github/workflows/simulator-screenshots.yml`
+[Actions → Simulator Screenshots](https://github.com/Xinyu-Cui111/AegisFlow/actions/workflows/simulator-screenshots.yml) → **Run workflow**
 
-1. 打开 https://github.com/Xinyu-Cui111/AegisFlow/actions  
-2. 选择 **Simulator Screenshots** → **Run workflow**  
-3. 跑完后会把 `dashboard.png` / `chat-modes.png` / `page-generated.png` / `walkthrough.mp4` 提交进 `docs/media/`  
+会产出：
 
-本地也可：
+| 目录 | 内容 |
+| --- | --- |
+| `gallery/01…16-*.png` | 全部主界面静帧 |
+| `scroll/scroll-*.mp4/.gif` | 首页 / 计划 / 数据 / 个人中心自动滚动短片 |
+| `walkthrough.mp4/.gif` | 多 Tab 串联录屏 |
+| `dashboard.png` 等 | README 顶栏三张速览图 |
+
+本地 Mac：
 
 ```bash
-# 需 macOS + Xcode
 chmod +x Scripts/capture-simulator-ui.sh
 Scripts/capture-simulator-ui.sh
 ```
 
-DEBUG 启动参数（仅 Debug）：
+## DEBUG 启动参数
 
 | 参数 | 作用 |
 | --- | --- |
-| `-uiDemo` | 跳过登录/引导，直达主界面 |
-| `-uiDemoTab dashboard\|chat\|…` | 指定 Tab |
+| `-uiDemo` | 跳过真实登录，进入演示态 |
+| `-uiDemoTab dashboard\|plan\|data\|chat\|profile` | 主 Tab |
+| `-uiDemoRoute auth\|onboarding\|settings\|statistics\|…` | 子页 / 登录 / 引导 |
 | `-uiDemoMode CHAT\|ORDER\|PAGE` | 助手模式 |
-| `-uiDemoPage` | 打开 PAGE 生成页样例 |
-
-## 文件
-
-| 文件 | 说明 |
-| --- | --- |
-| `dashboard.png` 等 | Simulator 截图（CI 产出后替换 HTML 预览） |
-| `walkthrough.mp4` / `.gif` | 短录屏 |
-| `simulator/` | CI 原始输出目录 |
-| `preview.html` | 旧 HTML 预览（仅兜底，不算真实界面） |
+| `-uiDemoPage` | PAGE 生成页样例 |
+| `-uiDemoScroll` | 页面自动上下滚动（供录屏） |

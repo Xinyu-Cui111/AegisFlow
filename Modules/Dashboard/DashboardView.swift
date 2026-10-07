@@ -429,6 +429,7 @@ struct DashboardView: View {
             
 
             GeometryReader { proxy in
+                ScrollViewReader { scrollProxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         Group {
@@ -438,6 +439,7 @@ struct DashboardView: View {
                             }
                         }
                         .debugOutline("Hero")
+                        .uiDemoTopAnchor()
 
                         VStack(spacing: DashboardV2Spacing.sectionGap) {
                             if let error = viewModel.error {
@@ -529,6 +531,7 @@ struct DashboardView: View {
                         .padding(.top, DashboardV2Spacing.scrollContentTopInset)
                         .padding(.bottom, AegisSpacing.bottomSafe)
                         .frame(maxWidth: .infinity, alignment: .top)
+                        .uiDemoBottomAnchor()
                     }
                     .frame(maxWidth: .infinity, alignment: .top)
                 }
@@ -538,6 +541,8 @@ struct DashboardView: View {
                 .scrollDismissesKeyboard(.interactively)
                 .refreshable {
                     await viewModel.refreshDashboard()
+                }
+                .uiDemoPerformAutoScroll(proxy: scrollProxy)
                 }
             }
         }

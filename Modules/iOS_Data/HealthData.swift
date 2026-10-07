@@ -37,6 +37,7 @@ struct HealthDataView: View {
                 .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 4)
                 
                 // 【滚动区】：下方内容块
+                ScrollViewReader { scrollProxy in
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
                         // --- 今日健康评分大卡片 ---
@@ -44,6 +45,7 @@ struct HealthDataView: View {
                             .scaleEffect(showContent ? 1 : 0.95)
                             .opacity(showContent ? 1 : 0)
                             .animation(.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0).delay(0.1), value: showContent)
+                            .uiDemoTopAnchor()
                         
                         // --- 横向滑动指标栏 ---
                         IndicatorRow()
@@ -77,8 +79,11 @@ struct HealthDataView: View {
                         
                         // 底部留白，防止被 TabBar 遮挡
                         Spacer(minLength: 120)
+                        EmptyView().uiDemoBottomAnchor()
                     }
                     .padding(.top, 15) // 内容与固定区的间距
+                }
+                .uiDemoPerformAutoScroll(proxy: scrollProxy)
                 }
             }
             

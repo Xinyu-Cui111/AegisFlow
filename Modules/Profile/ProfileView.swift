@@ -15,6 +15,7 @@ struct ProfileView: View {
             AegisDynamicBackground()
 
             NavigationStack {
+                ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
                         // 头部标题
@@ -29,6 +30,7 @@ struct ProfileView: View {
                         .padding(.horizontal, 24)
                         .padding(.top, 24)
                         .aegisReveal(delay: 0.00)
+                        .uiDemoTopAnchor()
 
                         if let error = viewModel.error {
                             ProfileErrorBanner(message: error)
@@ -113,11 +115,14 @@ struct ProfileView: View {
                         // 切换账号
                         SwitchAccountButton(onClick: { showLegacyAccountSwitchDialog = true })
                             .aegisReveal(delay: 0.60)
+                        EmptyView().uiDemoBottomAnchor()
                     }
                     .padding(.bottom, 100)
                 }
                 .id("profileScrollView")  // 防止导航返回时 ScrollView 重置位置
                 .background(Color.clear)
+                .uiDemoPerformAutoScroll(proxy: scrollProxy)
+                }
                 // 隐藏 NavigationLink：允许通过设置 navSelection（String）进行编程导航
                 NavigationLink(destination: AegisLevelView(), tag: "level", selection: $navSelection) { EmptyView() }
                 NavigationLink(destination: AegisRewardsView(), tag: "rewards", selection: $navSelection) { EmptyView() }

@@ -88,12 +88,20 @@ class AppState: ObservableObject {
                 return
             }
 
-            // DEBUG：-uiDemo 直达主界面，供 CI / Simulator 截真实界面
-            // 可选：-uiDemoTab dashboard|plan|data|chat|profile
-            // 可选：-uiDemoPage 打开 PAGE 生成页样例
+            // DEBUG：-uiDemo 供 CI / Simulator 截真实界面
+            // -uiDemoTab dashboard|plan|data|chat|profile
+            // -uiDemoRoute auth|onboarding|settings|statistics|page|…
+            // -uiDemoPage / -uiDemoMode / -uiDemoScroll
             if uiDemo {
                 Self.applyUIDemoBootstrap()
-                self.currentRoute = .main
+                let route = UIDemoLaunch.routeName
+                if route == "auth" || route == "login" {
+                    self.currentRoute = .auth
+                } else if route == "onboarding" {
+                    self.currentRoute = .onboarding
+                } else {
+                    self.currentRoute = .main
+                }
                 return
             }
             #endif
@@ -113,6 +121,16 @@ class AppState: ObservableObject {
 
     #if DEBUG
     private static func applyUIDemoBootstrap() {
+        let route = UIDemoLaunch.routeName
+
+        if route == "auth" || route == "login" {
+            TokenStorage.shared.clearTokens()
+            PreferencesStorage.shared.isLoggedIn = false
+            PreferencesStorage.shared.onboardingCompleted = false
+            // caller sets currentRoute = .auth when using -uiDemoRoute auth
+            return
+        }
+
         let now = Date()
         TokenStorage.shared.accessToken = "uidemo_access_token"
         TokenStorage.shared.refreshToken = "uidemo_refresh_token"
@@ -120,17 +138,16 @@ class AppState: ObservableObject {
         UserDefaults.standard.set("uidemo-user", forKey: APIConfig.userIdKey)
         UserDefaults.standard.set("uidemo@aegisflow.local", forKey: APIConfig.userEmailKey)
         PreferencesStorage.shared.isLoggedIn = true
+
+        if route == "onboarding" {
+            PreferencesStorage.shared.onboardingCompleted = false
+            return
+        }
+
         PreferencesStorage.shared.onboardingCompleted = true
 
-        let args = ProcessInfo.processInfo.arguments
-        let tabName: String = {
-            if let idx = args.firstIndex(of: "-uiDemoTab"), args.indices.contains(idx + 1) {
-                return args[idx + 1].lowercased()
-            }
-            return "dashboard"
-        }()
         let tab: Int = {
-            switch tabName {
+            switch UIDemoLaunch.tabName {
             case "plan": return 2
             case "data", "health": return 3
             case "chat", "assistant": return 4
@@ -140,7 +157,8 @@ class AppState: ObservableObject {
         }()
         NavigationCoordinator.shared.switchTab(tab)
 
-        if args.contains("-uiDemoPage") {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-uiDemoPage") || route == "page" {
             let sampleHTML = """
             <html><head><meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
@@ -157,8 +175,37 @@ class AppState: ObservableObject {
             </body></html>
             """
             NavigationCoordinator.shared.generatedPageHtml = sampleHTML
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 NavigationCoordinator.shared.navigate(to: .generatedPage(html: sampleHTML))
+            }
+            return
+        }
+
+        if let route {
+            let target: AppRoute? = {
+                switch route {
+                case "settings": return .settings
+                case "statistics", "stats": return .statistics
+                case "notifications", "notificationcenter": return .notificationCenter
+                case "level": return .level
+                case "rewards": return .rewards
+                case "premium": return .premium
+                case "healthgoals", "goals": return .healthGoals
+                case "knowledge", "knowledgegraph": return .knowledgeGraph
+                case "food", "foodanalysis": return .foodAnalysis
+                case "privacy": return .privacySettings
+                case "help": return .helpSupport
+                case "twin3d", "avatar": return .twin3D
+                default: return nil
+                }
+            }()
+            if let target {
+                if ["settings", "level", "rewards", "premium", "privacy", "help", "twin3d", "avatar", "healthgoals", "goals"].contains(route) {
+                    NavigationCoordinator.shared.switchTab(5)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    NavigationCoordinator.shared.navigate(to: target)
+                }
             }
         }
     }

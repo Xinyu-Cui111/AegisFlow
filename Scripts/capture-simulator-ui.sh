@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build AegisFlow for iOS Simulator, launch with -uiDemo, capture real screenshots + short video.
+# Build AegisFlow for iOS Simulator and capture ALL main screens + scroll videos.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -39,7 +39,6 @@ echo "Using simulator UDID=$UDID"
 
 echo "==> Build (Simulator, no code sign)"
 set -o pipefail
-# Project overrides SYMROOT to /tmp/AegisFlow; force products under DERIVED for CI.
 xcodebuild \
   -project "$PROJECT" \
   -scheme "$SCHEME" \
@@ -51,15 +50,13 @@ xcodebuild \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGN_IDENTITY="" \
-  build | tee "$OUT/xcodebuild.log" | tail -n 80
+  build | tee "$OUT/xcodebuild.log" | tail -n 40
 
 APP_PATH="$(
   find "$DERIVED" /tmp/AegisFlow -name "$APP_NAME" -type d 2>/dev/null | head -1 || true
 )"
 if [[ -z "$APP_PATH" ]]; then
-  echo "ERROR: AegisFlow.app not found under $DERIVED or /tmp/AegisFlow" >&2
-  ls -laR "$DERIVED/Build/Products" 2>/dev/null || true
-  ls -laR /tmp/AegisFlow/BuildProducts 2>/dev/null || true
+  echo "ERROR: AegisFlow.app not found" >&2
   exit 1
 fi
 echo "App: $APP_PATH"
@@ -77,9 +74,9 @@ xcrun simctl status_bar "$UDID" override \
 xcrun simctl uninstall "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 xcrun simctl install "$UDID" "$APP_PATH"
 
-capture() {
+capture_still() {
   local outfile="$1"; shift
-  echo "==> Launch for $outfile: $*"
+  echo "==> Still $outfile :: $*"
   xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
   sleep 1
   xcrun simctl launch "$UDID" "$BUNDLE_ID" "$@"
@@ -88,26 +85,73 @@ capture() {
   echo "saved $OUT/$outfile"
 }
 
-capture dashboard.png -uiDemo -uiDemoTab dashboard
-capture chat-modes.png -uiDemo -uiDemoTab chat -uiDemoMode CHAT
-capture page-generated.png -uiDemo -uiDemoTab chat -uiDemoPage
+# Record while app auto-scrolls (-uiDemoScroll ~6s motion)
+capture_scroll_video() {
+  local outfile="$1"; shift
+  echo "==> Scroll video $outfile :: $*"
+  xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
+  sleep 1
+  xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$OUT/$outfile" &
+  local REC_PID=$!
+  sleep 1
+  xcrun simctl launch "$UDID" "$BUNDLE_ID" "$@"
+  sleep 7
+  kill -INT "$REC_PID" 2>/dev/null || true
+  wait "$REC_PID" 2>/dev/null || true
+  sleep 1
+  echo "saved $OUT/$outfile"
+}
 
-echo "==> Record short walkthrough video"
+echo "==> Stills: 5 tabs + auth/onboarding + chat modes + key routes"
+capture_still 01-dashboard.png -uiDemo -uiDemoTab dashboard
+capture_still 02-plan.png -uiDemo -uiDemoTab plan
+capture_still 03-health-data.png -uiDemo -uiDemoTab data
+capture_still 04-chat-chat.png -uiDemo -uiDemoTab chat -uiDemoMode CHAT
+capture_still 05-chat-order.png -uiDemo -uiDemoTab chat -uiDemoMode ORDER
+capture_still 06-chat-page-mode.png -uiDemo -uiDemoTab chat -uiDemoMode PAGE
+capture_still 07-page-generated.png -uiDemo -uiDemoTab chat -uiDemoPage
+capture_still 08-profile.png -uiDemo -uiDemoTab profile
+capture_still 09-login.png -uiDemo -uiDemoRoute auth
+capture_still 10-onboarding.png -uiDemo -uiDemoRoute onboarding
+capture_still 11-settings.png -uiDemo -uiDemoRoute settings
+capture_still 12-statistics.png -uiDemo -uiDemoRoute statistics
+capture_still 13-notifications.png -uiDemo -uiDemoRoute notificationcenter
+capture_still 14-level.png -uiDemo -uiDemoRoute level
+capture_still 15-rewards.png -uiDemo -uiDemoRoute rewards
+capture_still 16-premium.png -uiDemo -uiDemoRoute premium
+
+# Back-compat names used by README gallery
+cp "$OUT/01-dashboard.png" "$OUT/dashboard.png"
+cp "$OUT/04-chat-chat.png" "$OUT/chat-modes.png"
+cp "$OUT/07-page-generated.png" "$OUT/page-generated.png"
+
+echo "==> Scroll / walkthrough videos"
+capture_scroll_video scroll-dashboard.mp4 -uiDemo -uiDemoTab dashboard -uiDemoScroll
+capture_scroll_video scroll-plan.mp4 -uiDemo -uiDemoTab plan -uiDemoScroll
+capture_scroll_video scroll-health-data.mp4 -uiDemo -uiDemoTab data -uiDemoScroll
+capture_scroll_video scroll-profile.mp4 -uiDemo -uiDemoTab profile -uiDemoScroll
+
+# Full tour: tabs + page
 xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
 sleep 1
 xcrun simctl io "$UDID" recordVideo --codec=h264 --force "$OUT/walkthrough.mp4" &
 REC_PID=$!
 sleep 1
-xcrun simctl launch "$UDID" "$BUNDLE_ID" -uiDemo -uiDemoTab dashboard
-sleep 3
-xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
-sleep 1
-xcrun simctl launch "$UDID" "$BUNDLE_ID" -uiDemo -uiDemoTab chat -uiDemoMode CHAT
-sleep 3
-xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
-sleep 1
-xcrun simctl launch "$UDID" "$BUNDLE_ID" -uiDemo -uiDemoTab chat -uiDemoPage
-sleep 3
+for args in \
+  "-uiDemo -uiDemoTab dashboard -uiDemoScroll" \
+  "-uiDemo -uiDemoTab plan" \
+  "-uiDemo -uiDemoTab data" \
+  "-uiDemo -uiDemoTab chat -uiDemoMode CHAT" \
+  "-uiDemo -uiDemoTab chat -uiDemoPage" \
+  "-uiDemo -uiDemoTab profile -uiDemoScroll"
+do
+  # shellcheck disable=SC2086
+  xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
+  sleep 0.6
+  # shellcheck disable=SC2086
+  xcrun simctl launch "$UDID" "$BUNDLE_ID" $args
+  sleep 4
+done
 kill -INT "$REC_PID" 2>/dev/null || true
 wait "$REC_PID" 2>/dev/null || true
 sleep 1

@@ -42,10 +42,12 @@ struct PlanView: View {
 
     var body: some View {
         ZStack {
+            ScrollViewReader { scrollProxy in
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     PlanPageHeader(viewModel: viewModel)
                         .aegisReveal(delay: 0.00)
+                        .uiDemoTopAnchor()
                     ExercisePlanSection(viewModel: viewModel, onOpenFitnessPlan: { plan in
                         withAnimation(.snappy(duration: 0.28, extraBounce: 0)) {
                             activeFitnessPlan = plan
@@ -59,10 +61,13 @@ struct PlanView: View {
                     AIAdjustSection(viewModel: viewModel)
                         .aegisReveal(delay: 0.32)
                     Spacer(minLength: 100)
+                    EmptyView().uiDemoBottomAnchor()
                 }
             }
             .scrollDismissesKeyboard(.interactively)
             .refreshable { await viewModel.refresh() }
+            .uiDemoPerformAutoScroll(proxy: scrollProxy)
+            }
             if viewModel.isAiProcessing {
                 AIProcessingOverlay()
             }

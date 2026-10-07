@@ -20,7 +20,7 @@ jobs:
   capture:
     name: Build + simctl capture
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 75
 
     steps:
       - name: Checkout
@@ -43,17 +43,36 @@ jobs:
           set -euo pipefail
           SRC=docs/media/simulator
           DEST=docs/media
+          mkdir -p "$DEST/gallery" "$DEST/scroll"
           brew install ffmpeg >/dev/null 2>&1 || true
+
+          # Numbered gallery stills
+          for f in "$SRC"/[0-9][0-9]-*.png; do
+            test -f "$f"
+            base="$(basename "$f")"
+            ffmpeg -y -i "$f" -vf "scale=390:-1:flags=lanczos" -update 1 "$DEST/gallery/$base"
+          done
+
+          # README hero aliases
           for f in dashboard.png chat-modes.png page-generated.png; do
             test -f "$SRC/$f"
-            # README-friendly width
             ffmpeg -y -i "$SRC/$f" -vf "scale=390:-1:flags=lanczos" -update 1 "$DEST/$f"
           done
+
+          # Scroll clips + gifs
+          for f in "$SRC"/scroll-*.mp4; do
+            test -f "$f"
+            base="$(basename "$f" .mp4)"
+            ffmpeg -y -i "$f" -vf "scale=390:-1:flags=lanczos" -c:v libx264 -crf 28 -an "$DEST/scroll/$base.mp4"
+            ffmpeg -y -i "$DEST/scroll/$base.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 8 -loop 0 "$DEST/scroll/$base.gif" || true
+          done
+
           if [[ -f "$SRC/walkthrough.mp4" ]]; then
             ffmpeg -y -i "$SRC/walkthrough.mp4" -vf "scale=390:-1:flags=lanczos" -c:v libx264 -crf 28 -an "$DEST/walkthrough.mp4"
-            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 12 -loop 0 "$DEST/walkthrough.gif" || true
+            ffmpeg -y -i "$DEST/walkthrough.mp4" -vf "fps=8,scale=390:-1:flags=lanczos" -t 20 -loop 0 "$DEST/walkthrough.gif" || true
           fi
-          ls -la "$DEST"
+
+          ls -la "$DEST" "$DEST/gallery" "$DEST/scroll"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -65,6 +84,8 @@ jobs:
             docs/media/page-generated.png
             docs/media/walkthrough.mp4
             docs/media/walkthrough.gif
+            docs/media/gallery/**
+            docs/media/scroll/**
           if-no-files-found: error
 
       - name: Commit media to main
@@ -74,10 +95,11 @@ jobs:
           git config user.name "Xinyu-Cui111"
           git config user.email "Xinyu-Cui111@users.noreply.github.com"
           git add docs/media/dashboard.png docs/media/chat-modes.png docs/media/page-generated.png \
-                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif
+                  docs/media/walkthrough.mp4 docs/media/walkthrough.gif \
+                  docs/media/gallery docs/media/scroll
           if git diff --cached --quiet; then
             echo "No media changes to commit"
             exit 0
           fi
-          git commit -m "docs(media): refresh Simulator screenshots and walkthrough from CI"
+          git commit -m "docs(media): full Simulator gallery + scroll clips from CI"
           git push origin HEAD:main

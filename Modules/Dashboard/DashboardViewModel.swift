@@ -259,6 +259,13 @@ class DashboardViewModel: ObservableObject {
         error = nil
         buildWeekDates()
         loadLocalDietaryCareFallback()
+        #if DEBUG
+        if UIDemoLaunch.isEnabled {
+            // CI / Simulator 预览：只用本地兜底数据，避免「unsupported URL」黄条进截图
+            isLoading = false
+            return
+        }
+        #endif
         fetchDailyData()
         fetchWeeklyData()
         fetchInsights()
@@ -271,6 +278,9 @@ class DashboardViewModel: ObservableObject {
         error = nil
         buildWeekDates()
         loadLocalDietaryCareFallback()
+        #if DEBUG
+        if UIDemoLaunch.isEnabled { return }
+        #endif
         fetchDailyData()
         fetchWeeklyData()
         fetchInsights()

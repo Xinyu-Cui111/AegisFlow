@@ -35,18 +35,47 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
 
 ## 界面预览
 
-| Dashboard | Chat · 三模式 | PAGE 生成页 |
+> **iOS Simulator 实机截图 / 滚动短视频**（GitHub Actions `macos-15` + `simctl`，DEBUG `-uiDemo`）。  
+> 重跑：[Actions → Simulator Screenshots](https://github.com/Xinyu-Cui111/AegisFlow/actions/workflows/simulator-screenshots.yml)
+
+### 主路径速览
+
+| Dashboard | Chat | PAGE 生成页 |
 | :---: | :---: | :---: |
 | ![Dashboard](docs/media/dashboard.png) | ![Chat](docs/media/chat-modes.png) | ![PAGE](docs/media/page-generated.png) |
 
 <p align="center">
-  <img src="docs/media/walkthrough.gif" alt="AegisFlow walkthrough" width="280">
+  <img src="docs/media/walkthrough.gif" alt="AegisFlow walkthrough" width="260">
 </p>
 
-录屏（Simulator）：[docs/media/walkthrough.mp4](docs/media/walkthrough.mp4)
+全路径录屏：[walkthrough.mp4](docs/media/walkthrough.mp4)
 
-> 上图为 **GitHub Actions `macos-15` + iOS Simulator 实机截图/录屏**（DEBUG `-uiDemo`）。  
-> 重跑：[Actions → Simulator Screenshots](https://github.com/Xinyu-Cui111/AegisFlow/actions/workflows/simulator-screenshots.yml) 或本地 `Scripts/capture-simulator-ui.sh`。
+### 全部界面（Gallery）
+
+| 首页 | 计划 | 健康数据 | 个人中心 |
+| :---: | :---: | :---: | :---: |
+| ![01](docs/media/gallery/01-dashboard.png) | ![02](docs/media/gallery/02-plan.png) | ![03](docs/media/gallery/03-health-data.png) | ![08](docs/media/gallery/08-profile.png) |
+
+| 登录 | Onboarding | 设置 | 统计 |
+| :---: | :---: | :---: | :---: |
+| ![09](docs/media/gallery/09-login.png) | ![10](docs/media/gallery/10-onboarding.png) | ![11](docs/media/gallery/11-settings.png) | ![12](docs/media/gallery/12-statistics.png) |
+
+| Chat·CHAT | Chat·ORDER | Chat·PAGE | PAGE 页 |
+| :---: | :---: | :---: | :---: |
+| ![04](docs/media/gallery/04-chat-chat.png) | ![05](docs/media/gallery/05-chat-order.png) | ![06](docs/media/gallery/06-chat-page-mode.png) | ![07](docs/media/gallery/07-page-generated.png) |
+
+| 通知中心 | Level | Rewards | Premium |
+| :---: | :---: | :---: | :---: |
+| ![13](docs/media/gallery/13-notifications.png) | ![14](docs/media/gallery/14-level.png) | ![15](docs/media/gallery/15-rewards.png) | ![16](docs/media/gallery/16-premium.png) |
+
+### 可滚动页 · 短动图
+
+| Dashboard 滚动 | 计划滚动 | 数据滚动 | 个人中心滚动 |
+| :---: | :---: | :---: | :---: |
+| ![sd](docs/media/scroll/scroll-dashboard.gif) | ![sp](docs/media/scroll/scroll-plan.gif) | ![sh](docs/media/scroll/scroll-health-data.gif) | ![spr](docs/media/scroll/scroll-profile.gif) |
+
+对应 mp4：[`docs/media/scroll/`](docs/media/scroll/)  
+完整图床说明：[docs/media/README.md](docs/media/README.md)
 
 ---
 
