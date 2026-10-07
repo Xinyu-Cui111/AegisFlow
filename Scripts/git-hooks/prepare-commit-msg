@@ -1,0 +1,5 @@
+#!/bin/sh
+# Strip Cursor auto Attribution trailer if present
+if [ -f "$1" ]; then
+  sed -i '/Co-authored-by: Cursor/d' "$1" 2>/dev/null || sed -i '' '/Co-authored-by: Cursor/d' "$1"
+fi
