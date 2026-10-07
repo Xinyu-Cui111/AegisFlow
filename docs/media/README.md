@@ -1,19 +1,26 @@
 # 媒体资源（截图 / 录屏）
 
-高收藏仓库几乎都靠**首屏视觉**建立信任。请在 Mac 模拟器上补齐下列文件（提交到本目录）：
+## 当前文件
 
-| 文件 | 内容建议 |
+| 文件 | 说明 |
 | --- | --- |
-| `dashboard.png` | 仪表盘（含 HealthKit 或演示数据） |
-| `chat-modes.png` | 助手页，能看出 CHAT / ORDER / PAGE 切换 |
-| `page-generated.png` | PAGE 模式生成页 |
-| `walkthrough.gif` 或 `.mp4` | 15–30 秒：打开 → 仪表盘 → 切模式 → 一条对话 |
+| `banner.svg` | README 顶栏 |
+| `dashboard.png` / `chat-modes.png` / `page-generated.png` | 设计 token 忠实预览（HTML → Playwright） |
+| `walkthrough.gif` | 三屏轮播短动图 |
+| `preview.html` | 预览源文件 |
+| `app-icon.png` | 工程内 App Icon |
 
-### 截取步骤（简版）
+重新生成预览：
+
+```bash
+node Scripts/capture-media-preview.mjs
+```
+
+## 用 Mac Simulator 替换（可选，更高可信）
 
 1. Xcode Run → iPhone 15 / iOS 16+ Simulator  
-2. `⌘S` 保存截图，或 `xcrun simctl io booted screenshot docs/media/dashboard.png`  
-3. 录屏可用 QuickTime / `xcrun simctl io booted recordVideo`  
-4. 控制单张 PNG < 800KB，GIF < 5MB，避免拖慢 GitHub 渲染  
+2. `xcrun simctl io booted screenshot docs/media/dashboard.png`  
+3. 同理截取助手三模式与 PAGE 页  
+4. 控制单张 PNG < 800KB；GIF 可用 `ffmpeg` 合成  
 
-补齐后把 README「界面预览」表的占位说明换成图片链接即可。
+替换后 README 图床路径不用改。

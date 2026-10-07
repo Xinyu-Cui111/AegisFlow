@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AegisFlow UI Preview</title>
+    <style>
+      :root {
+        --bg: #f2f5eb;
+        --card: #fafcf2;
+        --green: #77d6a1;
+        --green-deep: #4fae83;
+        --ink: #2e2e2e;
+        --mute: #ababab;
+        --hero1: #b8e8f2;
+        --hero2: #72d4e4;
+        --hero3: #48b8cc;
+        --chat-bg: #fafaf8;
+        --user: #4a9a8c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "SF Pro Text", "PingFang SC", "Segoe UI", sans-serif;
+        background: #1a1f1c;
+        color: var(--ink);
+      }
+      .stage {
+        min-height: 100vh;
+        display: flex;
+        gap: 28px;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+        flex-wrap: wrap;
+      }
+      .phone {
+        width: 390px;
+        height: 844px;
+        border-radius: 44px;
+        overflow: hidden;
+        background: var(--bg);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        position: relative;
+        border: 10px solid #111;
+      }
+      .phone[data-screen] {
+        display: none;
+      }
+      .phone.active,
+      .stage.show-all .phone {
+        display: block;
+      }
+      .notch {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 28px;
+        background: #111;
+        border-radius: 20px;
+        z-index: 5;
+      }
+      .status {
+        height: 54px;
+        padding: 18px 22px 0;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .hero {
+        margin: 0 0 12px;
+        padding: 18px 20px 36px;
+        background: linear-gradient(160deg, var(--hero1), var(--hero2) 55%, var(--hero3));
+        border-bottom-left-radius: 40% 18%;
+        border-bottom-right-radius: 40% 18%;
+        color: #0f3d44;
+      }
+      .hero .tag {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.55);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+      .hero h1 {
+        margin: 0 0 6px;
+        font-size: 28px;
+      }
+      .hero p {
+        margin: 0;
+        opacity: 0.85;
+        font-size: 14px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 14px;
+        box-shadow: 0 6px 18px rgba(74, 85, 51, 0.06);
+      }
+      .card .k {
+        color: var(--mute);
+        font-size: 12px;
+      }
+      .card .v {
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 4px;
+      }
+      .section {
+        padding: 16px;
+      }
+      .section h2 {
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        overflow: hidden;
+      }
+      .chip {
+        background: #e9edde;
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .tabbar {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 18px;
+        height: 64px;
+        background: var(--green);
+        border-radius: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        color: white;
+        font-size: 11px;
+        box-shadow: 0 10px 24px rgba(79, 174, 131, 0.35);
+      }
+      .tabbar .on {
+        transform: scale(1.08);
+        font-weight: 700;
+      }
+      .chat-head {
+        padding: 62px 16px 12px;
+        background: white;
+        border-bottom: 1px solid #e8ece9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .modes {
+        display: flex;
+        gap: 6px;
+      }
+      .mode {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #f0f7f2;
+        color: var(--green-deep);
+      }
+      .mode.on {
+        background: var(--green-deep);
+        color: white;
+      }
+      .messages {
+        background: var(--chat-bg);
+        height: calc(100% - 190px);
+        padding: 16px;
+        overflow: hidden;
+      }
+      .bubble {
+        max-width: 78%;
+        padding: 12px 14px;
+        border-radius: 18px;
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .ai {
+        background: white;
+        border: 1px solid #e8ece9;
+      }
+      .me {
+        background: var(--user);
+        color: white;
+        margin-left: auto;
+      }
+      .composer {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 18px;
+        background: white;
+        border-radius: 22px;
+        padding: 12px 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        color: var(--mute);
+        font-size: 14px;
+      }
+      .send {
+        margin-left: auto;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--green);
+      }
+      .page-body {
+        padding: 62px 16px 20px;
+        background: var(--bg);
+        height: 100%;
+      }
+      .page-body h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+      }
+      .bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        height: 160px;
+        margin: 24px 0;
+        padding: 16px;
+        background: white;
+        border-radius: 20px;
+      }
+      .bar {
+        flex: 1;
+        background: linear-gradient(180deg, var(--green), var(--green-deep));
+        border-radius: 10px 10px 4px 4px;
+      }
+      .note {
+        font-size: 12px;
+        color: #5d6b5f;
+        background: #e9edde;
+        padding: 12px;
+        border-radius: 14px;
+      }
+      .label {
+        position: absolute;
+        top: -28px;
+        left: 0;
+        color: #cfe8d7;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage show-all" id="stage">
+      <!-- Dashboard -->
+      <div class="phone active" data-screen="dashboard" id="dashboard">
+        <div class="label">dashboard</div>
+        <div class="notch"></div>
+        <div class="status"><span>9:41</span><span>AegisFlow</span></div>
+        <div class="hero">
+          <div class="tag">周期修复 · 周一主题</div>
+          <h1>早上好</h1>
+          <p>HealthKit 已同步 · 今日目标完成 62%</p>
+        </div>
+        <div class="metrics">
+          <div class="card"><div class="k">步数</div><div class="v">7,842</div></div>
+          <div class="card"><div class="k">睡眠</div><div class="v">7.2h</div></div>
+          <div class="card"><div class="k">心率</div><div class="v">68</div></div>
+          <div class="card"><div class="k">热量</div><div class="v">420</div></div>
+        </div>
+        <div class="section">
+          <h2>快捷记录</h2>
+          <div class="row">
+            <div class="chip">饮食</div>
+            <div class="chip">饮水</div>
+            <div class="chip">运动</div>
+            <div class="chip">心情</div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="on">首页</div>
+          <div>计划</div>
+          <div>助手</div>
+          <div>我的</div>
+        </div>
+      </div>
+
+      <!-- Chat modes -->
+      <div class="phone" data-screen="chat" id="chat">
+        <div class="label">chat-modes</div>
+        <div class="notch"></div>
+        <div class="chat-head">
+          <strong>AI 助手</strong>
+          <div class="modes">
+            <div class="mode on">CHAT</div>
+            <div class="mode">ORDER</div>
+            <div class="mode">PAGE</div>
+          </div>
+        </div>
+        <div class="messages">
+          <div class="bubble ai">今天睡眠 7.2 小时，深度睡眠偏低。要不要看一份本周睡眠分析页？</div>
+          <div class="bubble me">先给我三条改善建议</div>
+          <div class="bubble ai">1) 固定入睡窗口<br />2) 午后少咖啡因<br />3) 睡前 40 分钟远离强光屏</div>
+        </div>
+        <div class="composer">问健康问题或切换 ORDER / PAGE… <div class="send"></div></div>
+      </div>
+
+      <!-- Generated page -->
+      <div class="phone" data-screen="page" id="page">
+        <div class="label">page-generated</div>
+        <div class="notch"></div>
+        <div class="page-body">
+          <div class="mode on" style="display: inline-block; margin-bottom: 12px">PAGE</div>
+          <h1>本周睡眠分析</h1>
+          <p style="color: var(--mute); margin: 0">由助手动态生成 · GeneratedPageView</p>
+          <div class="bars">
+            <div class="bar" style="height: 55%"></div>
+            <div class="bar" style="height: 70%"></div>
+            <div class="bar" style="height: 48%"></div>
+            <div class="bar" style="height: 82%"></div>
+            <div class="bar" style="height: 66%"></div>
+            <div class="bar" style="height: 74%"></div>
+            <div class="bar" style="height: 60%"></div>
+          </div>
+          <div class="note">
+            配色与结构对齐仓库内 SwiftUI 设计 token（#77D6A1 / #F2F5EB / 日间 Hero
+            渐变）。此为源码忠实预览，可用 Mac Simulator 截图替换。
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const only = params.get("screen");
+      if (only) {
+        document.getElementById("stage").classList.remove("show-all");
+        document.querySelectorAll(".phone").forEach((el) => el.classList.remove("active"));
+        const target = document.getElementById(only);
+        if (target) target.classList.add("active");
+      }
+    </script>
+  </body>
+</html>

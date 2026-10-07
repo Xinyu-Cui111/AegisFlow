@@ -6,3 +6,6 @@ build/
 *.xccheckout
 *.xcscmblueprint
 xcuserdata/
+
+docs/media/gif-list.txt
+

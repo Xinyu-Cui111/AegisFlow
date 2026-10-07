@@ -33,7 +33,17 @@ AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意�
 
 仪表盘侧用 HealthKit 同步步数、心率、睡眠等指标，配合计划、记录与个人中心，形成可运行的原生 SwiftUI 产品原型。
 
-> 界面动图：请在 Mac 上按 [docs/media/README.md](docs/media/README.md) 从模拟器截取后放到 `docs/media/`（仓库已预留路径）。可先阅读下方能力与架构。
+## 界面预览
+
+| Dashboard | Chat · 三模式 | PAGE 生成页 |
+| :---: | :---: | :---: |
+| ![Dashboard](docs/media/dashboard.png) | ![Chat](docs/media/chat-modes.png) | ![PAGE](docs/media/page-generated.png) |
+
+<p align="center">
+  <img src="docs/media/walkthrough.gif" alt="AegisFlow walkthrough" width="280">
+</p>
+
+> 上图为按仓库 SwiftUI **设计 token 忠实还原**的手机框预览（配色/结构来自源码）。有 Mac 时可用 Simulator 实机截图替换，步骤见 [docs/media/README.md](docs/media/README.md)。
 
 ---
 
@@ -153,7 +163,7 @@ Color.tealDeep
 - [x] SwiftUI 主框架与 Tab 导航  
 - [x] AI 三模式（CHAT / ORDER / PAGE）  
 - [x] HealthKit 同步与 GRDB 本地读写  
-- [ ] 公开模拟器截图 / 短录屏（见 `docs/media/`）  
+- [x] 公开界面预览图 / 短动图（见 `docs/media/`；可用 Simulator 实拍替换）  
 - [ ] 单元测试与关键 UI 测试  
 - [ ] App Store 图标、隐私政策与提交流程  
 
