@@ -59,6 +59,8 @@ struct MainTabView: View {
             ProfileView()
         case .statistics:
             StatisticsScreen()
+        case .settings:
+            SettingsView()
         case .notificationSettings:
             NotificationSettingsView()
         case .privacySettings:

@@ -76,11 +76,16 @@ xcrun simctl install "$UDID" "$APP_PATH"
 
 capture_still() {
   local outfile="$1"; shift
-  echo "==> Still $outfile :: $*"
+  local settle=5
+  # 子页需要等 navigation push
+  if [[ "$*" == *"-uiDemoRoute"* ]] || [[ "$*" == *"-uiDemoPage"* ]]; then
+    settle=7
+  fi
+  echo "==> Still $outfile :: $* (settle ${settle}s)"
   xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
   sleep 1
   xcrun simctl launch "$UDID" "$BUNDLE_ID" "$@"
-  sleep 5
+  sleep "$settle"
   xcrun simctl io "$UDID" screenshot "$OUT/$outfile"
   echo "saved $OUT/$outfile"
 }

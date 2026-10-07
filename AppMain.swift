@@ -175,7 +175,9 @@ class AppState: ObservableObject {
             </body></html>
             """
             NavigationCoordinator.shared.generatedPageHtml = sampleHTML
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            // 先落到首页再 push，避免 Chat 全屏态吞掉 navigationDestination
+            NavigationCoordinator.shared.switchTab(1)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 NavigationCoordinator.shared.navigate(to: .generatedPage(html: sampleHTML))
             }
             return
@@ -203,7 +205,7 @@ class AppState: ObservableObject {
                 if ["settings", "level", "rewards", "premium", "privacy", "help", "twin3d", "avatar", "healthgoals", "goals"].contains(route) {
                     NavigationCoordinator.shared.switchTab(5)
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     NavigationCoordinator.shared.navigate(to: target)
                 }
             }

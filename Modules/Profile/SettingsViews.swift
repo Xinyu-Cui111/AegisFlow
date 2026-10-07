@@ -268,81 +268,81 @@ struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AegisDynamicBackground()
+        // 由 MainTabView 的 NavigationStack 承载，避免嵌套 NavigationStack 导致空白页
+        ZStack {
+            AegisDynamicBackground()
 
-                List {
-                    // 健康目标
-                    Section {
-                        NavigationLink {
-                            HealthGoalsSettingsView()
-                        } label: {
-                            SettingsMenuRow(icon: "flag.fill", title: "健康目标", color: .sageBright)
-                        }
-                    }
-
-                    // 通知设置
-                    Section {
-                        NavigationLink {
-                            NotificationSettingsView()
-                        } label: {
-                            SettingsMenuRow(icon: "bell.fill", title: "通知设置", color: .androidBlue)
-                        }
-                    }
-
-                    // 隐私设置
-                    Section {
-                        NavigationLink {
-                            PrivacySettingsView()
-                        } label: {
-                            SettingsMenuRow(icon: "lock.fill", title: "隐私设置", color: .purpleSoft)
-                        }
-                    }
-
-                    // 帮助与支持
-                    Section {
-                        NavigationLink {
-                            HelpSupportView()
-                        } label: {
-                            SettingsMenuRow(
-                                icon: "questionmark.circle.fill", title: "帮助与支持", color: .orangeWarm
-                            )
-                        }
-
-                        NavigationLink {
-                            WebContentView(title: "用户协议", url: "https://aegisflow.com/terms")
-                        } label: {
-                            SettingsMenuRow(icon: "doc.text.fill", title: "用户协议", color: .grayMid)
-                        }
-
-                        NavigationLink {
-                            WebContentView(title: "隐私政策", url: "https://aegisflow.com/privacy")
-                        } label: {
-                            SettingsMenuRow(
-                                icon: "hand.raised.fill", title: "隐私政策", color: .grayMid)
-                        }
-                    }
-
-                    // 关于
-                    Section {
-                        HStack {
-                            SettingsIcon(icon: "info.circle.fill", color: .tealDeep)
-                            Text("版本")
-                                .font(.system(size: 15))
-                                .foregroundColor(.grayDark)
-                            Spacer()
-                            Text("2.0.0")
-                                .font(.system(size: 14))
-                                .foregroundColor(.grayMid)
-                        }
+            List {
+                // 健康目标
+                Section {
+                    NavigationLink {
+                        HealthGoalsSettingsView()
+                    } label: {
+                        SettingsMenuRow(icon: "flag.fill", title: "健康目标", color: .sageBright)
                     }
                 }
-                .listStyle(.insetGrouped)
+
+                // 通知设置
+                Section {
+                    NavigationLink {
+                        NotificationSettingsView()
+                    } label: {
+                        SettingsMenuRow(icon: "bell.fill", title: "通知设置", color: .androidBlue)
+                    }
+                }
+
+                // 隐私设置
+                Section {
+                    NavigationLink {
+                        PrivacySettingsView()
+                    } label: {
+                        SettingsMenuRow(icon: "lock.fill", title: "隐私设置", color: .purpleSoft)
+                    }
+                }
+
+                // 帮助与支持
+                Section {
+                    NavigationLink {
+                        HelpSupportView()
+                    } label: {
+                        SettingsMenuRow(
+                            icon: "questionmark.circle.fill", title: "帮助与支持", color: .orangeWarm
+                        )
+                    }
+
+                    NavigationLink {
+                        WebContentView(title: "用户协议", url: "https://aegisflow.com/terms")
+                    } label: {
+                        SettingsMenuRow(icon: "doc.text.fill", title: "用户协议", color: .grayMid)
+                    }
+
+                    NavigationLink {
+                        WebContentView(title: "隐私政策", url: "https://aegisflow.com/privacy")
+                    } label: {
+                        SettingsMenuRow(
+                            icon: "hand.raised.fill", title: "隐私政策", color: .grayMid)
+                    }
+                }
+
+                // 关于
+                Section {
+                    HStack {
+                        SettingsIcon(icon: "info.circle.fill", color: .tealDeep)
+                        Text("版本")
+                            .font(.system(size: 15))
+                            .foregroundColor(.grayDark)
+                        Spacer()
+                        Text("2.0.0")
+                            .font(.system(size: 14))
+                            .foregroundColor(.grayMid)
+                    }
+                }
             }
-            .navigationTitle("设置")
-            .navigationBarTitleDisplayMode(.large)
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
         }
+        .navigationTitle("设置")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

@@ -7,20 +7,19 @@ struct GeneratedPageView: View {
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
-        NavigationStack {
-            WebView(htmlContent: htmlContent)
-                .ignoresSafeArea(edges: .bottom)
-                .navigationTitle("助理生成页面")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: { dismiss() }) {
-                            Image(systemName: "xmark")
-                                .foregroundColor(.grayDark)
-                        }
+        // 由外层 NavigationStack 承载，避免嵌套导致空白
+        WebView(htmlContent: htmlContent)
+            .ignoresSafeArea(edges: .bottom)
+            .navigationTitle("助理生成页面")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.grayDark)
                     }
                 }
-        }
+            }
     }
 }
 

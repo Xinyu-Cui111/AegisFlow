@@ -955,7 +955,10 @@ struct ChatInputArea: View {
     }
 
     private var isCompactComposer: Bool {
-        isConversationEmpty && !hasTypedContent && !isInputFocused
+        #if DEBUG
+        if UIDemoLaunch.isEnabled { return false }  // CI 预览始终展开 CHAT/ORDER/PAGE 模式条
+        #endif
+        return isConversationEmpty && !hasTypedContent && !isInputFocused
     }
 
     var body: some View {
@@ -1525,13 +1528,23 @@ class ChatViewModel: ObservableObject {
             loadMockConversations()
         }
         #if DEBUG
-        let args = ProcessInfo.processInfo.arguments
-        if let idx = args.firstIndex(of: "-uiDemoMode"), args.indices.contains(idx + 1) {
-            switch args[idx + 1].uppercased() {
+        if let mode = UIDemoLaunch.aiModeName {
+            switch mode {
             case "ORDER": currentMode = .order
             case "PAGE": currentMode = .page
             default: currentMode = .chat
             }
+        }
+        // 预览态塞一条消息，避免只拍到空态欢迎页
+        if UIDemoLaunch.isEnabled && messages.isEmpty {
+            messages = [
+                ChatMessage(
+                    id: "uidemo-1",
+                    role: .assistant,
+                    content: "今天睡眠 7.2 小时。可切换「下单 / 对话 / 页面」模式继续。",
+                    timestamp: Date()
+                )
+            ]
         }
         #endif
     }
