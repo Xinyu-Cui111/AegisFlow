@@ -1,258 +1,168 @@
-# AegisFlow iOS 项目
+<p align="center">
+  <img src="docs/media/banner.svg" alt="AegisFlow" width="100%">
+</p>
 
-基于安卓应用 AegisFlow 的 iOS 复刻版本，使用 SwiftUI 开发。
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2ea44f" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/SwiftUI-iOS%2016%2B-orange" alt="SwiftUI iOS 16+">
+  <img src="https://img.shields.io/badge/HealthKit-integrated-c0392b" alt="HealthKit">
+  <img src="https://img.shields.io/badge/AI-CHAT%20%7C%20ORDER%20%7C%20PAGE-306E6F" alt="AI three modes">
+</p>
 
-## 项目概述
+<p align="center"><b>AegisFlow</b> — AI 原生健康管理 iOS App：Dashboard 聚合 HealthKit，助手用自然语言完成查数据、下单、看定制页。</p>
 
-AegisFlow 是一款智能健康管理应用，提供以下核心功能：
+<p align="center">
+  <a href="#核心能力">核心能力</a> ·
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#架构">架构</a> ·
+  <a href="CONTRIBUTING.md">贡献</a>
+</p>
 
-- **智能仪表盘**: 全面展示健康指标、趋势分析和AI建议
-- **AI健康助手**: 智能对话，支持下单、对话、页面生成三种模式
-- **运动计划**: 专业运动计划、微运动、习惯养成
-- **个人中心**: 用户资料、设备管理、设置
+---
 
-## 技术栈
+## 为什么做这个
+
+健康 App 常见问题是：**数据多、入口散、任务要点很多按钮**。  
+AegisFlow 把高频操作收到助手里，用三种交互模式覆盖不同意图：
+
+| 模式 | 用户在说什么 | 产品怎么应 |
+| --- | --- | --- |
+| **CHAT** | 问答、健康咨询 | 消息气泡、快捷建议、语音输入 |
+| **ORDER** | 「帮我点外卖」 | 对话触发 WebView 下单流程 |
+| **PAGE** | 「给我看本周睡眠分析」 | 动态生成页面（`GeneratedPageView`） |
+
+仪表盘侧用 HealthKit 同步步数、心率、睡眠等指标，配合计划、记录与个人中心，形成可运行的原生 SwiftUI 产品原型。
+
+> 界面动图：请在 Mac 上按 [docs/media/README.md](docs/media/README.md) 从模拟器截取后放到 `docs/media/`（仓库已预留路径）。可先阅读下方能力与架构。
+
+---
+
+## 核心能力
+
+- **HealthKit 仪表盘** — 指标聚合、趋势与洞察入口  
+- **AI 三模式助手** — `CHAT` / `ORDER` / `PAGE` 可切换  
+- **运动与习惯** — 计划、微运动、习惯养成  
+- **记录** — 饮食 / 饮水 / 心情 / 运动 / 睡眠等  
+- **个人中心** — 资料、设备、设置、本地通知  
+- **数据层** — GRDB 本地库、Keychain Token、URLSession API 客户端  
+
+---
+
+## 快速开始
+
+### 环境
+
+- macOS + Xcode 15+（建议）
+- iOS 16.0+ 模拟器或真机  
+- 可选：后端 API（见 `docs/AEGIS_API_DRAFT.md`）；无后端时可验证 UI / 本地数据 / HealthKit 权限流  
+
+### 打开工程
+
+```bash
+git clone https://github.com/Xinyu-Cui111/AegisFlow.git
+cd AegisFlow
+open AegisFlow.xcodeproj
+```
+
+1. 选择 Scheme：`AegisFlow`  
+2. 目标设备：iOS 16+ Simulator  
+3. Run（⌘R）  
+
+DEBUG 可用启动参数 `-forceLogin` 清本地登录态，方便反复测登录 / Onboarding。
+
+### 试玩包（可选）
+
+仓库含未签名 IPA：[`Artifacts/AegisFlow-unsigned.ipa`](Artifacts/AegisFlow-unsigned.ipa)  
+仅供有签名能力的开发者侧载验证，**不是** App Store 包。
+
+---
+
+## 架构
+
+```mermaid
+flowchart TB
+  subgraph UI[SwiftUI]
+    D[Dashboard]
+    C[Chat · AiMode]
+    P[Plan / Profile]
+  end
+  subgraph Core[App Core]
+    N[NavigationCoordinator]
+    DM[DataManager]
+  end
+  subgraph Services[Services]
+    HK[HealthDataService]
+    DB[DatabaseManager · GRDB]
+    API[APIClient]
+    NT[NotificationService]
+  end
+  D --> DM
+  C --> DM
+  P --> DM
+  DM --> N
+  DM --> HK
+  DM --> DB
+  DM --> API
+  DM --> NT
+```
+
+```
+AppMain.swift           入口 · APNs · 根路由
+GlobalManager/          Tab · DataManager · NavigationCoordinator
+Modules/                Dashboard · Chat · Plan · Profile · …
+Services/               API · GRDB · HealthKit · Storage · Notification
+ShareComponents/        主题色 · 空态/加载 · 通用控件
+docs/                   API 草案 · 媒体资源说明
+Artifacts/              未签名 IPA（可选）
+```
 
 | 组件 | 技术 |
-|------|------|
-| 框架 | SwiftUI |
+| --- | --- |
+| UI | SwiftUI |
 | 语言 | Swift 5.9+ |
-| 最低版本 | iOS 16.0 |
-| 数据库 | GRDB.swift |
-| 网络 | URLSession (可扩展为Alamofire) |
-| 存储 | UserDefaults + Keychain |
-| 通知 | UserNotifications framework |
+| 最低系统 | iOS 16.0 |
+| 本地库 | GRDB.swift |
+| 网络 | URLSession |
 | 健康数据 | HealthKit |
+| 安全存储 | Keychain + UserDefaults |
 
-## 项目结构
+主题色：Sage `#A7CDB8` / `#A5D23D`，Teal Deep `#306E6F`；仪表盘支持按星期切换日间主题。
 
-```
-AegisFlow_iOS/
-├── AppMain.swift                         # 应用入口 + APNs推送 + 路由分发
-├── GlobalManager/
-│   ├── MainTabView.swift                # 主Tab导航 + 路由目标 + 底部栏
-│   ├── DataManager.swift                # 全局数据管理 + AppRoute枚举
-│   └── NavigationCoordinator.swift      # 集中式路由管理 (NavigationPath)
-├── Modules/
-│   ├── Dashboard/
-│   │   ├── DashboardView.swift          # 仪表盘 (Hero弧形+主题纹样)
-│   │   ├── DashboardViewModel.swift
-│   │   ├── StatisticsViewModel.swift
-│   │   ├── NotificationViewModel.swift
-│   │   ├── InsightDetailView.swift      # 健康洞察详情
-│   │   ├── TeammateHomeView.swift       # 健康团队
-│   │   ├── NotificationCenterView.swift
-│   │   ├── StatisticsScreen.swift
-│   │   ├── FoodAnalysisView.swift
-│   │   ├── KnowledgeGraphView.swift
-│   │   └── Components/LogBottomSheet.swift
-│   ├── Plan/
-│   │   ├── PlanView.swift
-│   │   └── PlanViewModel.swift
-│   ├── Chat/
-│   │   ├── ChatView.swift               # 聊天 (侧滑面板+模式切换+语音)
-│   │   ├── GeneratedPageView.swift
-│   │   ├── ElemeOrderWebView.swift      # 外卖WebView
-│   │   └── ChatSubFeatures.swift
-│   ├── Profile/
-│   │   ├── ProfileView.swift            # 统一Profile + 子页面导航
-│   │   ├── ProfileViewModel.swift
-│   │   ├── SettingsViewModel.swift
-│   │   ├── GamificationViewModels.swift # Level/Reward/Premium VM
-│   │   ├── UserInsightCard.swift        # 用户画像卡片
-│   │   ├── GamificationViews.swift
-│   │   ├── SettingsViews.swift
-│   │   └── ReminderSettingsView.swift
-│   ├── DeskPet/
-│   │   └── DeskPetFloatingOverlay.swift # 桌宠悬浮组件
-│   ├── Onboarding/OnboardingView.swift
-│   ├── Auth/AuthViews.swift
-│   ├── Avatar/Twin3DView.swift
-│   ├── iOS_Data/                        # 健康数据页 (新版)
-│   └── iOS_Profile/                     # Profile子页面 (Level/Rewards/Premium等)
-├── Services/
-│   ├── APIClient.swift                  # 35+端点 + token自动刷新
-│   ├── DatabaseManager.swift
-│   ├── StorageManager.swift
-│   ├── NotificationService.swift        # 本地通知 + APNs
-│   └── HealthDataService.swift
-└── ShareComponents/
-    ├── Extensions.swift                 # 颜色/字体/间距/卡片样式
-    ├── LoadingStates.swift              # 空状态/加载/错误/骨架屏
-    ├── WeekDatePicker.swift
-    └── IndicatorCard.swift
-```
+---
 
-## 主题色系
+## 开发提示
 
-### 品牌色
-- Sage Light: `#A7CDB8`
-- Sage Bright: `#A5D23D`
-- Teal Deep: `#306E6F`
+**新页面：** 在 `Modules/` 建模块 → `XXXView` + `ViewModel` → 在 `MainTabView` / `NavigationCoordinator` 挂路由。
 
-### 周主题色（7种日间主题）
-| 星期 | Primary | Secondary | 主题 |
-|------|---------|-----------|------|
-| 周日 | #2F97A3 | #5BC2D2 | 周期修复 |
-| 周一 | #B85E8E | #DB87B3 | 关节激活 |
-| 周二 | #5B73C8 | #8FA3E8 | 睡眠改善 |
-| 周三 | #3C8E79 | #69B9A4 | 训练恢复 |
-| 周四 | #A6A01B | #CCC82A | 压力疏导 |
-| 周五 | #C8676E | #E3878D | 心肺唤醒 |
-| 周六 | #2B97A5 | #56C0CC | 轻松收束 |
+**主题色：**
 
-## 已完成模块
-
-### 1. 项目基础配置
-- 完整颜色系统
-- 字体规范
-- 圆角规范
-- 间距规范
-- 阴影规范
-- 通用UI组件样式
-
-### 2. 主导航
-- TabView 底部导航栏
-- 5个主要页面入口
-
-### 3. 启动页
-- 品牌Logo动画
-- 渐变背景
-
-### 4. Onboarding引导流程
-- 欢迎页
-- 性别选择
-- 健康目标选择
-- 活动水平选择
-- 职业选择
-- 爱好选择
-
-### 5. Dashboard仪表盘
-- Hero区域（周主题渐变）
-- 记录模块（10种记录类型）
-- 目标进度卡片
-- 生理指标面板
-- 营养概览
-- 健康趋势图表
-- 今日目标网格
-- 健康见解轮播
-
-### 6. 记录弹窗
-- 饮食记录
-- 饮水记录
-- 心情记录
-- 运动记录
-- 睡眠记录
-- 其他记录类型
-
-### 7. 计划模块
-- 运动计划Tab
-- 微运动Tab
-- 习惯养成Tab
-
-### 8. Chat聊天页面
-- 消息气泡
-- 输入区域
-- AI头像和状态
-- 对话列表面板
-- 打字指示器
-
-### 9. Profile个人中心
-- 用户资料卡片
-- 身体数据管理
-- 设备管理
-- 设置列表
-
-### 10. 认证模块
-- 登录页面
-- 注册页面
-- 忘记密码页面
-
-### 11. 服务层
-- API客户端
-- 数据库管理器（GRDB）
-- 存储管理器（UserDefaults + Keychain）
-- 通知服务
-- HealthKit服务
-
-## Android 一比一复刻进度
-
-### 已完成 (Phase 1-4)
-- [x] 集中式路由管理 (NavigationCoordinator + NavigationPath)
-- [x] 18个路由全部对齐Android NavHost
-- [x] AppMain启动逻辑：token检测 + 条件路由 (Auth/Onboarding/Main)
-- [x] APIClient完善：35+端点全覆盖 + token自动刷新 + 多部分上传
-- [x] 所有ViewModel补全 (Plan, Statistics, Settings, Gamification, Notification)
-- [x] Dashboard Hero弧形裁切 (HeroBottomArcShape) + 7种CardPatternStyle
-- [x] 底部导航栏：SageBright实色胶囊 + 白色图标 + 1.1x缩放动画 + shadow
-- [x] Chat侧滑面板改为右侧overlay + ORDER/CHAT/PAGE模式切换 + 语音输入
-- [x] Profile统一实现 + 子页面导航 (Level/Rewards/Premium/Settings)
-- [x] DeskPet桌宠悬浮组件
-- [x] ElemeOrder外卖WebView
-- [x] InsightDetail健康洞察详情页
-- [x] TeammateHome健康团队页
-- [x] UserInsightCard用户画像卡片
-- [x] APNs推送通知 (替代Android FCM)
-- [x] 空状态/加载状态/错误横幅组件 (LoadingStates.swift)
-
-### 已完成 (补充)
-- [x] 数据库实际读写 (GRDB: 会话/消息/健康指标/活动日志/用户偏好)
-- [x] HealthKit数据同步 (步数/心率/睡眠/卡路里/体重/身高/周趋势+后台观察者)
-- [x] 图表组件 (折线图/环形进度/柱状图/营养条/迷你柱状图 - Swift Charts)
-- [x] Twin3D完整流程 (选项获取/描述提交/轮询查询/模型加载/截图分享)
-
-### 测试
-- [ ] 单元测试
-- [ ] UI测试
-- [ ] 集成测试
-
-### 发布准备
-- [ ] App Store配置
-- [ ] 图标和启动屏
-- [ ] 隐私政策和使用条款
-- [ ] 本地化支持
-
-## 开发指南
-
-### 添加新页面
-1. 在 `Modules/` 下创建新模块目录
-2. 创建 `XXXView.swift` 和 `XXXViewModel.swift`
-3. 在 `MainTabView.swift` 添加Tab入口
-
-### 使用主题色
 ```swift
-// 使用周主题色
-let themeColors = Color.weekThemeColor(for: dayOfWeek)
-RoundedRectangle()
-    .fill(LinearGradient(
-        colors: [themeColors.primary, themeColors.secondary],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    ))
-
-// 使用品牌色
+let theme = Color.weekThemeColor(for: dayOfWeek)
 Color.sageBright
 Color.tealDeep
 ```
 
-### 数据持久化
-```swift
-// 使用PreferencesStorage
-PreferencesStorage.shared.isLoggedIn = true
+**持久化：** `PreferencesStorage` / `TokenStorage`（Keychain）/ `DatabaseManager`。
 
-// 使用TokenStorage（Keychain）
-TokenStorage.shared.accessToken = "token"
+更细的 API 说明见 [docs/AEGIS_API_DRAFT.md](docs/AEGIS_API_DRAFT.md)。
 
-// 使用DatabaseManager
-try DatabaseManager.shared.insertSession(session)
-```
+---
 
-## 后端API
+## 路线图
 
-基础URL: `http://8.156.83.92:8080/api/v1`
+- [x] SwiftUI 主框架与 Tab 导航  
+- [x] AI 三模式（CHAT / ORDER / PAGE）  
+- [x] HealthKit 同步与 GRDB 本地读写  
+- [ ] 公开模拟器截图 / 短录屏（见 `docs/media/`）  
+- [ ] 单元测试与关键 UI 测试  
+- [ ] App Store 图标、隐私政策与提交流程  
 
-详见 `docs/API_Documentation.md`
+---
+
+## 参与贡献
+
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。Issue / PR 欢迎。
 
 ## 许可证
 
-MIT License
+[MIT](LICENSE) © Xinyu-Cui111
